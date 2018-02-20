@@ -16,50 +16,50 @@ import {createTwirpRequest, throwTwirpError} from './twirp';
 
 {{range .Models}}
 export interface {{.Name}} {
-	{{range .Fields -}}
+    {{range .Fields -}}
     {{.Name}}: {{.Type}};
     {{end}}
 }
 
 interface {{.Name}}JSON {
-	{{range .Fields -}}
-	{{.JSONName}}: {{.JSONType}};
-	{{end}}
+    {{range .Fields -}}
+    {{.JSONName}}: {{.JSONType}};
+    {{end}}
 }
 
 const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
-	return {
-		{{range .Fields -}}
-		{{.JSONName}}: {{if eq .Type "Date"}}m.{{.Name}}.toISOString(){{else}}m.{{.Name}}{{end}},
-		{{end}}
-	};
+    return {
+        {{range .Fields -}}
+        {{.JSONName}}: {{if eq .Type "Date"}}m.{{.Name}}.toISOString(){{else}}m.{{.Name}}{{end}},
+        {{end}}
+    };
 };
 
 const JSONTo{{.Name}} = (m: {{.Name}}JSON): {{.Name}} => {
-	return {
-		{{range .Fields -}}
-		{{.Name}}: {{if eq .Type "Date"}}new Date(m.{{.JSONName}}){{else}}m.{{.JSONName}}{{end}},
-		{{end}}
-	};
+    return {
+        {{range .Fields -}}
+        {{.Name}}: {{if eq .Type "Date"}}new Date(m.{{.JSONName}}){{else}}m.{{.JSONName}}{{end}},
+        {{end}}
+    };
 };
 {{end}}
 
 {{range .Services}}
 export class {{.Name}} {
     private hostname: string;
-	private pathPrefix = "/twirp/{{.Package}}.{{.Name}}/";
+    private pathPrefix = "/twirp/{{.Package}}.{{.Name}}/";
 
     constructor(hostname: string) {
         this.hostname = hostname;
     }
 
-	{{- range .Methods}}
+    {{- range .Methods}}
     {{.Name}}({{.InputArg}}: {{.InputType}}): Promise<{{.OutputType}}> {
-		const url = this.hostname + this.pathPrefix + "{{.Path}}";
+        const url = this.hostname + this.pathPrefix + "{{.Path}}";
         return fetch(createTwirpRequest(url, {{.InputType}}ToJSON({{.InputArg}}))).then((resp) => {
-			if (!resp.ok) {
-				return throwTwirpError(resp);
-			}
+            if (!resp.ok) {
+                return throwTwirpError(resp);
+            }
 
             return resp.json().then(JSONTo{{.OutputType}});
         });

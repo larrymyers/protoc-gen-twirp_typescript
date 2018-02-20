@@ -1,19 +1,22 @@
 import {Haberdasher, Hat, TwirpError} from './ts_client';
 
-const client = new Haberdasher('http://localhost:8080');
+const haberdasher = new Haberdasher('http://localhost:8080');
 
-client.makeHat({inches: 10})
+haberdasher.makeHat({inches: 10})
     .then((hat: Hat) => {
+        console.log("Example makeHat response:\n");
         console.log(hat);
+        console.log("");
     })
     .catch((err: Error) => {
         console.error(err);
     });
 
-client.makeHat({inches: -1})
+haberdasher.makeHat({inches: -1})
     .then((hat: Hat) => {
         console.log(hat);
     })
     .catch((err: TwirpError) => {
-        console.error(err.code + " " + err.message);
+        console.log("Example makeHat error:\n");
+        console.error(err.code + ": " + err.message);
     });

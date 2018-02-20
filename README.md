@@ -1,25 +1,28 @@
 # Twirp Typescript Plugin
 
-A protoc plugin for generating a twirp client suitable for use in browser and node.js projects.  
+A protoc plugin for generating a twirp client suitable for browser and node.js projects.  
 The generated code is a commonjs module that can be used in both typescript and javascript projects.
 
-Both a Promise and fetch implementation much be provided in the global namespace.
+## Setup
 
-Suggested polyfills for complete browser and node.js support:
+The protobuf v3 compiler is required. You can get the latest precompiled binary for your system here:
+
+https://github.com/google/protobuf/releases
+
+Both a Promise and fetch implementation must be provided in the global namespace. Polyfills are required
+to support IE11 and older, and a fetch polyfill is required for node.js support.
+
+Suggested polyfills for cross browser and node.js support:
 
 * [es6-promise](https://github.com/stefanpenner/es6-promise)
 * [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch)
-
-An optional package.json and index.js can be generated so that the code can be published to an NPM repository.
-If this option is used the isomorphic-fetch polyfill will be automatically included so IE11 and node.js
-support works without any extra effort. 
 
 ## Usage
 
     protoc --twirp_typescript_out=./example/ts_client ./example/service.proto
     
-All generated files will be placed relative to the output directory for the plugin.  This is different behavior than
-the twirp go plugin, which places the files relative to the input proto files.
+All generated files will be placed relative to the specified output directory for the plugin.  
+This is different behavior than the twirp go plugin, which places the files relative to the input proto files.
 
 This decision is intentional, since only client code is generated, and the destination is likely somewhere different
 than the server code.
@@ -28,9 +31,9 @@ Using the Twirp hashberdasher proto:
     
     import {Haberdasher} from 'service';
     
-    const hab = new Haberdasher('http://localhost:8080');
+    const haberdasher = new Haberdasher('http://localhost:8080');
     
-    hab.makeHat({inches: 10})
+    haberdasher.makeHat({inches: 10})
         .then((hat) => {
             console.log(hat);
         })
@@ -49,11 +52,20 @@ If you'd like to publish the generated code as an npm module then use this param
 name in the package.json file.  An index module will be created as well that will expose all
 exported interfaces and classes, as well as reference the isomorphic-fetch polyfill.
 
-    protoc --twirp_typescript_out=package_name=example_client:./example/ts_client ./example/service.proto
+    protoc --twirp_typescript_out=package_name=haberdasher:./example/ts_client ./example/service.proto
 
 ## Using the Example
 
     make run
     cd example/ts_client
     npm install
-    ./node_modules/.bin/tsc index.ts
+    cd ..
+    ./ts_client/node_modules/.bin/tsc main.ts
+    
+Run the server:
+
+    go run cmd/haberdasher/main.go
+     
+In a new terminal run the client:
+ 
+    node main.js

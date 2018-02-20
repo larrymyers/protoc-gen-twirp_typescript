@@ -64,6 +64,7 @@ func generate(in *plugin.CodeGeneratorRequest) *plugin.CodeGeneratorResponse {
 		}
 
 		resp.File = append(resp.File, idx)
+		resp.File = append(resp.File, generator.CreateTSConfig())
 		resp.File = append(resp.File, generator.CreatePackageJSON(pkgName))
 	}
 
