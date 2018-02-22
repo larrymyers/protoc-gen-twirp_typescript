@@ -2,6 +2,7 @@ package generator
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"strings"
 	"text/template"
@@ -30,7 +31,7 @@ interface {{.Name}}JSON {
 const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
     return {
         {{range .Fields -}}
-        {{.JSONName}}: {{if eq .Type "Date"}}m.{{.Name}}.toISOString(){{else}}m.{{.Name}}{{end}},
+        {{.JSONName}}: {{stringify .}},
         {{end}}
     };
 };
@@ -38,7 +39,7 @@ const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
 const JSONTo{{.Name}} = (m: {{.Name}}JSON): {{.Name}} => {
     return {
         {{range .Fields -}}
-        {{.Name}}: {{if eq .Type "Date"}}new Date(m.{{.JSONName}}){{else}}m.{{.JSONName}}{{end}},
+        {{.Name}}: {{parse .}},
         {{end}}
     };
 };
@@ -80,10 +81,11 @@ type Model struct {
 }
 
 type ModelField struct {
-	Name     string
-	Type     string
-	JSONName string
-	JSONType string
+	Name      string
+	Type      string
+	JSONName  string
+	JSONType  string
+	IsMessage bool
 }
 
 type Service struct {
@@ -110,18 +112,7 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 		}
 
 		for _, f := range m.GetField() {
-			tsType, jsonType := protoToTSType(f)
-			jsonName := f.GetName()
-			name := camelCase(jsonName)
-
-			field := ModelField{
-				Name:     name,
-				Type:     tsType,
-				JSONName: jsonName,
-				JSONType: jsonType,
-			}
-
-			model.Fields = append(model.Fields, field)
+			model.Fields = append(model.Fields, newField(f))
 		}
 
 		ctx.Models = append(ctx.Models, model)
@@ -153,7 +144,12 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 		ctx.Services = append(ctx.Services, service)
 	}
 
-	t, err := template.New("client_api").Parse(apiTemplate)
+	funcMap := template.FuncMap{
+		"stringify": stringify,
+		"parse":     parse,
+	}
+
+	t, err := template.New("client_api").Funcs(funcMap).Parse(apiTemplate)
 	if err != nil {
 		return nil, err
 	}
@@ -168,6 +164,25 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 	return cf, nil
 }
 
+func newField(f *descriptor.FieldDescriptorProto) ModelField {
+	tsType, jsonType := protoToTSType(f)
+	jsonName := f.GetName()
+	name := camelCase(jsonName)
+
+	field := ModelField{
+		Name:     name,
+		Type:     tsType,
+		JSONName: jsonName,
+		JSONType: jsonType,
+	}
+
+	field.IsMessage = f.GetType() == descriptor.FieldDescriptorProto_TYPE_MESSAGE
+
+	return field
+}
+
+// generates the (Type, JSONType) tuple for a ModelField so marshal/unmarshal functions
+// will work when converting between TS interfaces and protobuf JSON.
 func protoToTSType(f *descriptor.FieldDescriptorProto) (string, string) {
 	switch f.GetType() {
 	case descriptor.FieldDescriptorProto_TYPE_DOUBLE,
@@ -192,7 +207,7 @@ func protoToTSType(f *descriptor.FieldDescriptorProto) (string, string) {
 			return "Date", "string"
 		}
 
-		return removePkg(name), removePkg(name)
+		return removePkg(name), removePkg(name) + "JSON"
 	}
 
 	log.Printf("unknown type: %s", f.GetType())
@@ -217,4 +232,28 @@ func camelCase(s string) string {
 	}
 
 	return strings.Join(parts, "")
+}
+
+func stringify(f ModelField) string {
+	if f.Type == "Date" {
+		return fmt.Sprintf("m.%s.toISOString()", f.Name)
+	}
+
+	if f.IsMessage {
+		return fmt.Sprintf("%sToJSON(m.%s)", f.Type, f.Name)
+	}
+
+	return "m." + f.Name
+}
+
+func parse(f ModelField) string {
+	if f.Type == "Date" {
+		return fmt.Sprintf("new Date(m.%s)", f.JSONName)
+	}
+
+	if f.IsMessage {
+		return fmt.Sprintf("JSONTo%s(m.%s)", f.Type, f.JSONName)
+	}
+
+	return "m." + f.JSONName
 }
