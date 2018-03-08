@@ -3,7 +3,6 @@ package generator
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"strings"
 	"text/template"
 
@@ -81,11 +80,12 @@ type Model struct {
 }
 
 type ModelField struct {
-	Name      string
-	Type      string
-	JSONName  string
-	JSONType  string
-	IsMessage bool
+	Name       string
+	Type       string
+	JSONName   string
+	JSONType   string
+	IsMessage  bool
+	IsRepeated bool
 }
 
 type Service struct {
@@ -177,6 +177,7 @@ func newField(f *descriptor.FieldDescriptorProto) ModelField {
 	}
 
 	field.IsMessage = f.GetType() == descriptor.FieldDescriptorProto_TYPE_MESSAGE
+	field.IsRepeated = isRepeated(f)
 
 	return field
 }
@@ -184,17 +185,23 @@ func newField(f *descriptor.FieldDescriptorProto) ModelField {
 // generates the (Type, JSONType) tuple for a ModelField so marshal/unmarshal functions
 // will work when converting between TS interfaces and protobuf JSON.
 func protoToTSType(f *descriptor.FieldDescriptorProto) (string, string) {
+	tsType := "string"
+	jsonType := "string"
+
 	switch f.GetType() {
 	case descriptor.FieldDescriptorProto_TYPE_DOUBLE,
 		descriptor.FieldDescriptorProto_TYPE_FIXED32,
 		descriptor.FieldDescriptorProto_TYPE_FIXED64,
 		descriptor.FieldDescriptorProto_TYPE_INT32,
 		descriptor.FieldDescriptorProto_TYPE_INT64:
-		return "number", "number"
+		tsType = "number"
+		jsonType = "number"
 	case descriptor.FieldDescriptorProto_TYPE_STRING:
-		return "string", "string"
+		tsType = "string"
+		jsonType = "string"
 	case descriptor.FieldDescriptorProto_TYPE_BOOL:
-		return "boolean", "boolean"
+		tsType = "boolean"
+		jsonType = "boolean"
 	case descriptor.FieldDescriptorProto_TYPE_MESSAGE:
 		name := f.GetTypeName()
 
@@ -204,15 +211,24 @@ func protoToTSType(f *descriptor.FieldDescriptorProto) (string, string) {
 		// JSON.stringify already handles serializing Date to its RFC 3339 format.
 		//
 		if name == ".google.protobuf.Timestamp" {
-			return "Date", "string"
+			tsType = "Date"
+			jsonType = "string"
+		} else {
+			tsType = removePkg(name)
+			jsonType = removePkg(name) + "JSON"
 		}
-
-		return removePkg(name), removePkg(name) + "JSON"
 	}
 
-	log.Printf("unknown type: %s", f.GetType())
+	if isRepeated(f) {
+		tsType = tsType + "[]"
+		jsonType = jsonType + "[]"
+	}
 
-	return "string", "string"
+	return tsType, jsonType
+}
+
+func isRepeated(field *descriptor.FieldDescriptorProto) bool {
+	return field.Label != nil && *field.Label == descriptor.FieldDescriptorProto_LABEL_REPEATED
 }
 
 func removePkg(s string) string {
@@ -235,6 +251,18 @@ func camelCase(s string) string {
 }
 
 func stringify(f ModelField) string {
+	if f.IsRepeated {
+		singularType := f.Type[0:len(f.Type)-2] // strip array brackets from type
+
+		if f.Type == "Date" {
+			return fmt.Sprintf("m.%s.map((n) => n.toISOString())", f.Name)
+		}
+
+		if f.IsMessage {
+			return fmt.Sprintf("m.%s.map(%sToJSON)", f.Name, singularType)
+		}
+	}
+
 	if f.Type == "Date" {
 		return fmt.Sprintf("m.%s.toISOString()", f.Name)
 	}
@@ -247,6 +275,18 @@ func stringify(f ModelField) string {
 }
 
 func parse(f ModelField) string {
+	if f.IsRepeated {
+		singularType := f.Type[0:len(f.Type)-2] // strip array brackets from type
+
+		if f.Type == "Date" {
+			return fmt.Sprintf("m.%s.map((n) => new Date(n))", f.JSONName)
+		}
+
+		if f.IsMessage {
+			return fmt.Sprintf("m.%s.map(JSONTo%s)", f.JSONName, singularType)
+		}
+	}
+
 	if f.Type == "Date" {
 		return fmt.Sprintf("new Date(m.%s)", f.JSONName)
 	}
