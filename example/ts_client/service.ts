@@ -64,7 +64,12 @@ const JSONToSize = (m: SizeJSON): Size => {
 
 
 
-export class Haberdasher {
+export interface Haberdasher {
+    makeHat: (size: Size) => Promise<Hat>;
+    
+}
+
+export class DefaultHaberdasher implements Haberdasher {
     private hostname: string;
     private pathPrefix = "/twirp/twitch.twirp.example.Haberdasher/";
 

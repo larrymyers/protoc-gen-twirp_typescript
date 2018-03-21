@@ -45,7 +45,13 @@ const JSONTo{{.Name}} = (m: {{.Name}}JSON): {{.Name}} => {
 {{end}}
 
 {{range .Services}}
-export class {{.Name}} {
+export interface {{.Name}} {
+	{{- range .Methods}}
+    {{.Name}}: ({{.InputArg}}: {{.InputType}}) => Promise<{{.OutputType}}>;
+    {{end}}
+}
+
+export class Default{{.Name}} implements {{.Name}} {
     private hostname: string;
     private pathPrefix = "/twirp/{{.Package}}.{{.Name}}/";
 

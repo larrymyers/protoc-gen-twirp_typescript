@@ -9,6 +9,11 @@ The protobuf v3 compiler is required. You can get the latest precompiled binary 
 
 https://github.com/google/protobuf/releases
 
+### Twirp Go Server (optional)
+
+    go get github.com/twitchtv/twirp/protoc-gen-twirp
+    go get -u github.com/golang/protobuf/protoc-gen-go
+
 Both a Promise and fetch implementation must be provided in the global namespace. Polyfills are required
 to support IE11 and older, and a fetch polyfill is required for node.js support.
 

@@ -1,6 +1,6 @@
-import {Haberdasher, Hat, TwirpError} from './ts_client';
+import {DefaultHaberdasher, Hat, TwirpError} from './ts_client';
 
-const haberdasher = new Haberdasher('http://localhost:8080');
+const haberdasher = new DefaultHaberdasher('http://localhost:8080');
 
 haberdasher.makeHat({inches: 10})
     .then((hat: Hat) => {
