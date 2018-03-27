@@ -24,6 +24,7 @@ Suggested polyfills for cross browser and node.js support:
 
 ## Usage
 
+    go get -u go.larrymyers.com/protoc-gen-twirp_typescript
     protoc --twirp_typescript_out=./example/ts_client ./example/service.proto
     
 All generated files will be placed relative to the specified output directory for the plugin.  
