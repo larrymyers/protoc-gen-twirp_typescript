@@ -19,10 +19,10 @@ func CreatePackageJSON(projectName string) *plugin.CodeGeneratorResponse_File {
     "*.d.ts"
   ],
   "dependencies": {
-    "isomorphic-fetch": "^2.2.1",
     "tslib": "^1.9.0"
   },
   "devDependencies": {
+    "isomorphic-fetch": "^2.2.1",
     "typescript": "^2.7.1"
   }
 }

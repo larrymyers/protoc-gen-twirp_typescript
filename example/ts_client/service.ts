@@ -1,5 +1,5 @@
 
-import {createTwirpRequest, throwTwirpError} from './twirp';
+import {createTwirpRequest, throwTwirpError, Fetch} from './twirp';
 
 
 export interface Hat {
@@ -71,14 +71,16 @@ export interface Haberdasher {
 
 export class DefaultHaberdasher implements Haberdasher {
     private hostname: string;
+    private fetch: Fetch;
     private pathPrefix = "/twirp/twitch.twirp.example.Haberdasher/";
 
-    constructor(hostname: string) {
+    constructor(hostname: string, fetch: Fetch) {
         this.hostname = hostname;
+        this.fetch = fetch;
     }
     makeHat(size: Size): Promise<Hat> {
         const url = this.hostname + this.pathPrefix + "MakeHat";
-        return fetch(createTwirpRequest(url, SizeToJSON(size))).then((resp) => {
+        return this.fetch(createTwirpRequest(url, SizeToJSON(size))).then((resp) => {
             if (!resp.ok) {
                 return throwTwirpError(resp);
             }

@@ -12,7 +12,7 @@ import (
 )
 
 const apiTemplate = `
-import {createTwirpRequest, throwTwirpError} from './twirp';
+import {createTwirpRequest, throwTwirpError, Fetch} from './twirp';
 
 {{range .Models}}
 export interface {{.Name}} {
@@ -53,16 +53,18 @@ export interface {{.Name}} {
 
 export class Default{{.Name}} implements {{.Name}} {
     private hostname: string;
+    private fetch: Fetch;
     private pathPrefix = "/twirp/{{.Package}}.{{.Name}}/";
 
-    constructor(hostname: string) {
+    constructor(hostname: string, fetch: Fetch) {
         this.hostname = hostname;
+        this.fetch = fetch;
     }
 
     {{- range .Methods}}
     {{.Name}}({{.InputArg}}: {{.InputType}}): Promise<{{.OutputType}}> {
         const url = this.hostname + this.pathPrefix + "{{.Path}}";
-        return fetch(createTwirpRequest(url, {{.InputType}}ToJSON({{.InputArg}}))).then((resp) => {
+        return this.fetch(createTwirpRequest(url, {{.InputType}}ToJSON({{.InputArg}}))).then((resp) => {
             if (!resp.ok) {
                 return throwTwirpError(resp);
             }

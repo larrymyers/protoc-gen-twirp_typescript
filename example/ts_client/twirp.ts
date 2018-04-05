@@ -30,3 +30,5 @@ export const createTwirpRequest = (url: string, body: any): Request => {
         body: JSON.stringify(body)
     });
 };
+
+export type Fetch = (input: RequestInfo, init?: RequestInit) => Promise<Response>;

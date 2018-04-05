@@ -1,6 +1,7 @@
-import {DefaultHaberdasher, Hat, TwirpError} from './ts_client';
+import 'isomorphic-fetch';
+import {DefaultHaberdasher, Hat, TwirpError} from './index';
 
-const haberdasher = new DefaultHaberdasher('http://localhost:8080');
+const haberdasher = new DefaultHaberdasher('http://localhost:8080', fetch);
 
 haberdasher.makeHat({inches: 10})
     .then((hat: Hat) => {

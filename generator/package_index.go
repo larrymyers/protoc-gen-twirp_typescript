@@ -10,9 +10,7 @@ import (
 )
 
 const indexTemplate = `
-import 'isomorphic-fetch';
-
-{{range .}}
+{{- range .}}
 export * from './{{.}}';
 {{end}}
 `
