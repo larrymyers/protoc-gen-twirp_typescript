@@ -18,6 +18,13 @@ message Hat {
     string name = 3;
 
     google.protobuf.Timestamp created_on = 4;
+
+    message Style {
+        string name = 1;
+        bool fancy = 2;
+    }
+
+    Style style = 5;
 }
 
 // Size is passed when requesting a new hat to be made. It's always

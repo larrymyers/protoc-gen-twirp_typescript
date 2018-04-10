@@ -124,6 +124,18 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 		}
 
 		ctx.Models = append(ctx.Models, model)
+
+		for _, n := range m.NestedType {
+			model := Model{
+				Name: m.GetName() + "_" + n.GetName(),
+			}
+
+			for _, f := range n.GetField() {
+				model.Fields = append(model.Fields, newField(f))
+			}
+
+			ctx.Models = append(ctx.Models, model)
+		}
 	}
 
 	for _, s := range d.GetService() {
@@ -260,7 +272,7 @@ func camelCase(s string) string {
 
 func stringify(f ModelField) string {
 	if f.IsRepeated {
-		singularType := f.Type[0:len(f.Type)-2] // strip array brackets from type
+		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
 
 		if f.Type == "Date" {
 			return fmt.Sprintf("m.%s.map((n) => n.toISOString())", f.Name)
@@ -284,7 +296,7 @@ func stringify(f ModelField) string {
 
 func parse(f ModelField) string {
 	if f.IsRepeated {
-		singularType := f.Type[0:len(f.Type)-2] // strip array brackets from type
+		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
 
 		if f.Type == "Date" {
 			return fmt.Sprintf("m.%s.map((n) => new Date(n))", f.JSONName)

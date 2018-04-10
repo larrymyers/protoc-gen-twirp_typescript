@@ -7,6 +7,7 @@ export interface Hat {
     color: string;
     name: string;
     createdOn: Date;
+    style: Style;
     
 }
 
@@ -15,6 +16,7 @@ interface HatJSON {
     color: string;
     name: string;
     created_on: string;
+    style: StyleJSON;
     
 }
 
@@ -24,6 +26,7 @@ const HatToJSON = (m: Hat): HatJSON => {
         color: m.color,
         name: m.name,
         created_on: m.createdOn.toISOString(),
+        style: StyleToJSON(m.style),
         
     };
 };
@@ -34,6 +37,35 @@ const JSONToHat = (m: HatJSON): Hat => {
         color: m.color,
         name: m.name,
         createdOn: new Date(m.created_on),
+        style: JSONToStyle(m.style),
+        
+    };
+};
+
+export interface Hat_Style {
+    name: string;
+    fancy: boolean;
+    
+}
+
+interface Hat_StyleJSON {
+    name: string;
+    fancy: boolean;
+    
+}
+
+const Hat_StyleToJSON = (m: Hat_Style): Hat_StyleJSON => {
+    return {
+        name: m.name,
+        fancy: m.fancy,
+        
+    };
+};
+
+const JSONToHat_Style = (m: Hat_StyleJSON): Hat_Style => {
+    return {
+        name: m.name,
+        fancy: m.fancy,
         
     };
 };
