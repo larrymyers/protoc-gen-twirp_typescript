@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/rs/cors"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/twitchtv/twirp"
@@ -33,6 +36,17 @@ func (h *randomHaberdasher) MakeHat(ctx context.Context, size *example.Size) (*e
 }
 
 func main() {
-	server := example.NewHaberdasherServer(&randomHaberdasher{}, nil)
-	log.Fatal(http.ListenAndServe(":8080", server))
+	mux := http.NewServeMux()
+
+	mux.Handle(example.HaberdasherPathPrefix, example.NewHaberdasherServer(&randomHaberdasher{}, nil))
+
+	handler := cors.AllowAll().Handler(mux)
+
+	addr := fmt.Sprintf(":%d", 8080)
+	log.Printf("server listening at: %s", addr)
+
+	err := http.ListenAndServe(addr, handler)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

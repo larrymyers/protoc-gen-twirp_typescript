@@ -15,14 +15,19 @@ test:
 	go test -v ./...
 
 lint:
-	go list ./... | grep -v /vendor/ | xargs -L1 golint -set_exit_status
+	golint -set_exit_status ./...
 
-run: install
-	mkdir -p example/ts_client && \
-	protoc --proto_path=${GOPATH}/src:. --twirp_out=. --go_out=. --twirp_typescript_out=package_name=haberdasher:./example/ts_client ./example/service.proto
+build_proto: install
+	protoc --twirp_out=. --go_out=. --twirp_typescript_out=package_name=haberdasher:./example/ts_client ./example/service.proto
 
 build_linux:
 	GOOS=linux GOARCH=amd64 go build -o ${BINARY} ${LDFLAGS} go.larrymyers.com/protoc-gen-twirp_typescript
+
+client_setup:
+	cd pbjs-twirp && \
+	npm link && \
+	cd ../example/pbjs_client && \
+	npm link pbjs-twirp
 
 clean:
 	-rm -f ${GOPATH}/bin/${BINARY}

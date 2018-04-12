@@ -1,0 +1,15 @@
+{
+  "name": "pbjs-twirp",
+  "version": "0.0.1",
+  "description": "the runtime library for protoc-gen-twirp_typescript",
+  "main": "dist/twirp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Larry Myers <larry@larrymyers.com>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "protobufjs": "^6.8.8"
+  }
+}

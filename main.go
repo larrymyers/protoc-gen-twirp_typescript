@@ -4,7 +4,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"strings"
 
 	"github.com/golang/protobuf/proto"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
@@ -36,36 +35,19 @@ func readRequest(r io.Reader) *plugin.CodeGeneratorRequest {
 
 func generate(in *plugin.CodeGeneratorRequest) *plugin.CodeGeneratorResponse {
 	resp := &plugin.CodeGeneratorResponse{}
+	params := generator.GetParameters(in)
+	gen := generator.NewGenerator(params)
 
 	for _, f := range in.GetProtoFile() {
-		// skip google/protobuf/timestamp, we don't do any special serialization for jsonpb.
-		if *f.Name == "google/protobuf/timestamp.proto" {
-			continue
-		}
-
-		cf, err := generator.CreateClientAPI(f)
+		files, err := gen.Generate(f)
 		if err != nil {
 			resp.Error = proto.String(err.Error())
 			return resp
 		}
 
-		resp.File = append(resp.File, cf)
-	}
-
-	resp.File = append(resp.File, generator.RuntimeLibrary())
-
-	params := getParameters(in)
-
-	if pkgName, ok := params["package_name"]; ok {
-		idx, err := generator.CreatePackageIndex(resp.File)
-		if err != nil {
-			resp.Error = proto.String(err.Error())
-			return resp
+		for _, cf := range files {
+			resp.File = append(resp.File, cf)
 		}
-
-		resp.File = append(resp.File, idx)
-		resp.File = append(resp.File, generator.CreateTSConfig())
-		resp.File = append(resp.File, generator.CreatePackageJSON(pkgName))
 	}
 
 	return resp
@@ -80,23 +62,4 @@ func writeResponse(w io.Writer, resp *plugin.CodeGeneratorResponse) {
 	if err != nil {
 
 	}
-}
-
-type Params map[string]string
-
-func getParameters(in *plugin.CodeGeneratorRequest) Params {
-	params := make(Params)
-
-	if in.Parameter == nil {
-		return params
-	}
-
-	pairs := strings.Split(*in.Parameter, ",")
-
-	for _, pair := range pairs {
-		kv := strings.Split(pair, "=")
-		params[kv[0]] = kv[1]
-	}
-
-	return params
 }
