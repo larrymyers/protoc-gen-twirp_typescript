@@ -9,6 +9,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+	"log"
 )
 
 const apiTemplate = `
@@ -126,17 +127,21 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 		ctx.Models = append(ctx.Models, model)
 
 		for _, n := range m.NestedType {
-			model := Model{
+			log.Printf("nested model: %s", n.GetName())
+			nested := Model{
 				Name: m.GetName() + "_" + n.GetName(),
 			}
 
-			for _, f := range n.GetField() {
-				model.Fields = append(model.Fields, newField(f))
+			for _, nf := range n.GetField() {
+				log.Printf("nested model field: %s", nf.GetName())
+				nested.Fields = append(nested.Fields, newField(nf))
 			}
 
-			ctx.Models = append(ctx.Models, model)
+			ctx.Models = append(ctx.Models, nested)
 		}
 	}
+
+	log.Println(ctx.Models)
 
 	for _, s := range d.GetService() {
 		service := Service{
