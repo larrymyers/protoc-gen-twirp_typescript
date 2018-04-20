@@ -21,7 +21,7 @@ export const throwTwirpError = (resp: Response) => {
     return resp.json().then((err: TwirpErrorJSON) => { throw new TwirpError(err); })
 };
 
-export const createTwirpRequest = (url: string, body: any): Request => {
+export const createTwirpRequest = (url: string, body: object): Request => {
     return new Request(url, {
         method: "POST",
         headers: {
