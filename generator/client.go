@@ -27,6 +27,7 @@ interface {{.Name}}JSON {
     {{end}}
 }
 
+// @ts-ignore: ignore unused local.
 const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
     return {
         {{range .Fields -}}
@@ -35,6 +36,7 @@ const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
     };
 };
 
+// @ts-ignore: ignore unused local.
 const JSONTo{{.Name}} = (m: {{.Name}}JSON): {{.Name}} => {
     return {
         {{range .Fields -}}
@@ -260,7 +262,7 @@ func camelCase(s string) string {
 
 func stringify(f ModelField) string {
 	if f.IsRepeated {
-		singularType := f.Type[0:len(f.Type)-2] // strip array brackets from type
+		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
 
 		if f.Type == "Date" {
 			return fmt.Sprintf("m.%s.map((n) => n.toISOString())", f.Name)
@@ -284,7 +286,7 @@ func stringify(f ModelField) string {
 
 func parse(f ModelField) string {
 	if f.IsRepeated {
-		singularType := f.Type[0:len(f.Type)-2] // strip array brackets from type
+		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
 
 		if f.Type == "Date" {
 			return fmt.Sprintf("m.%s.map((n) => new Date(n))", f.JSONName)
