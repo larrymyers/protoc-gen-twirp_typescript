@@ -18,6 +18,7 @@ interface HatJSON {
     
 }
 
+// @ts-ignore: ignore unused local.
 const HatToJSON = (m: Hat): HatJSON => {
     return {
         size: m.size,
@@ -28,6 +29,7 @@ const HatToJSON = (m: Hat): HatJSON => {
     };
 };
 
+// @ts-ignore: ignore unused local.
 const JSONToHat = (m: HatJSON): Hat => {
     return {
         size: m.size,
@@ -48,6 +50,7 @@ interface SizeJSON {
     
 }
 
+// @ts-ignore: ignore unused local.
 const SizeToJSON = (m: Size): SizeJSON => {
     return {
         inches: m.inches,
@@ -55,6 +58,7 @@ const SizeToJSON = (m: Size): SizeJSON => {
     };
 };
 
+// @ts-ignore: ignore unused local.
 const JSONToSize = (m: SizeJSON): Size => {
     return {
         inches: m.inches,
