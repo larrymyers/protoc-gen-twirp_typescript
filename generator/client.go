@@ -27,6 +27,7 @@ interface {{.Name}}JSON {
     {{end}}
 }
 
+{{if .CanMarshal}}
 const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
     return {
         {{range .Fields -}}
@@ -34,7 +35,9 @@ const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
         {{end}}
     };
 };
+{{end -}}
 
+{{if .CanUnmarshal}}
 const JSONTo{{.Name}} = (m: {{.Name}}JSON): {{.Name}} => {
     return {
         {{range .Fields -}}
@@ -42,6 +45,7 @@ const JSONTo{{.Name}} = (m: {{.Name}}JSON): {{.Name}} => {
         {{end}}
     };
 };
+{{end -}}
 {{end}}
 
 {{range .Services}}
@@ -78,13 +82,15 @@ export class Default{{.Name}} implements {{.Name}} {
 `
 
 type APIContext struct {
-	Models   []Model
-	Services []Service
+	Models   []*Model
+	Services []*Service
 }
 
 type Model struct {
-	Name   string
-	Fields []ModelField
+	Name         string
+	Fields       []ModelField
+	CanMarshal   bool
+	CanUnmarshal bool
 }
 
 type ModelField struct {
@@ -115,7 +121,7 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 	pkg := d.GetPackage()
 
 	for _, m := range d.GetMessageType() {
-		model := Model{
+		model := &Model{
 			Name: m.GetName(),
 		}
 
@@ -127,7 +133,7 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 	}
 
 	for _, s := range d.GetService() {
-		service := Service{
+		service := &Service{
 			Name:    s.GetName(),
 			Package: pkg,
 		}
@@ -152,6 +158,22 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 		ctx.Services = append(ctx.Services, service)
 	}
 
+	// Only include the custom 'ToJSON' and 'JSONTo' methods in generated code
+	// if the Model is part of an rpc method input arg or return type.
+	for _, m := range ctx.Models {
+		for _, s := range ctx.Services {
+			for _, sm := range s.Methods {
+				if m.Name == sm.InputType {
+					m.CanMarshal = true
+				}
+
+				if m.Name == sm.OutputType {
+					m.CanUnmarshal = true
+				}
+			}
+		}
+	}
+
 	funcMap := template.FuncMap{
 		"stringify": stringify,
 		"parse":     parse,
@@ -163,7 +185,10 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 	}
 
 	b := bytes.NewBufferString("")
-	t.Execute(b, ctx)
+	err = t.Execute(b, ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	cf := &plugin.CodeGeneratorResponse_File{}
 	cf.Name = proto.String(tsModuleFilename(d))
@@ -260,7 +285,7 @@ func camelCase(s string) string {
 
 func stringify(f ModelField) string {
 	if f.IsRepeated {
-		singularType := f.Type[0:len(f.Type)-2] // strip array brackets from type
+		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
 
 		if f.Type == "Date" {
 			return fmt.Sprintf("m.%s.map((n) => n.toISOString())", f.Name)
@@ -284,7 +309,7 @@ func stringify(f ModelField) string {
 
 func parse(f ModelField) string {
 	if f.IsRepeated {
-		singularType := f.Type[0:len(f.Type)-2] // strip array brackets from type
+		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
 
 		if f.Type == "Date" {
 			return fmt.Sprintf("m.%s.map((n) => new Date(n))", f.JSONName)

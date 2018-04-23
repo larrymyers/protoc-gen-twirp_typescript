@@ -18,15 +18,6 @@ interface HatJSON {
     
 }
 
-const HatToJSON = (m: Hat): HatJSON => {
-    return {
-        size: m.size,
-        color: m.color,
-        name: m.name,
-        created_on: m.createdOn.toISOString(),
-        
-    };
-};
 
 const JSONToHat = (m: HatJSON): Hat => {
     return {
@@ -48,14 +39,8 @@ interface SizeJSON {
     
 }
 
-const SizeToJSON = (m: Size): SizeJSON => {
-    return {
-        inches: m.inches,
-        
-    };
-};
 
-const JSONToSize = (m: SizeJSON): Size => {
+const SizeToJSON = (m: Size): SizeJSON => {
     return {
         inches: m.inches,
         
