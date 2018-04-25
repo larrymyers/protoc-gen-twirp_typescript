@@ -81,11 +81,6 @@ export class Default{{.Name}} implements {{.Name}} {
 {{end}}
 `
 
-type APIContext struct {
-	Models   []*Model
-	Services []*Service
-}
-
 type Model struct {
 	Name         string
 	Fields       []ModelField
@@ -116,10 +111,75 @@ type ServiceMethod struct {
 	OutputType string
 }
 
-func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorResponse_File, error) {
+func NewAPIContext() APIContext {
 	ctx := APIContext{}
+	ctx.modelLookup = make(map[string]*Model)
+
+	return ctx
+}
+
+type APIContext struct {
+	Models      []*Model
+	Services    []*Service
+	modelLookup map[string]*Model
+}
+
+func (ctx *APIContext) AddModel(m *Model) {
+	ctx.Models = append(ctx.Models, m)
+	ctx.modelLookup[m.Name] = m
+}
+
+// ApplyMarshalFlags will inspect the CanMarshal and CanUnmarshal flags for models where
+// the flags are enabled and recursively set the same values on all the models that are field types.
+func (ctx *APIContext) ApplyMarshalFlags() {
+	for _, m := range ctx.Models {
+		for _, f := range m.Fields {
+			// skip primitive types and WKT Timestamps
+			if !f.IsMessage || f.Type == "Date" {
+				continue
+			}
+
+			baseType := f.Type
+			if f.IsRepeated {
+				baseType = strings.Trim(baseType, "[]")
+			}
+
+			if m.CanMarshal {
+				ctx.enableMarshal(ctx.modelLookup[baseType])
+			}
+
+			if m.CanUnmarshal {
+				ctx.enableUnmarshal(ctx.modelLookup[baseType])
+			}
+		}
+	}
+}
+
+func (ctx *APIContext) enableMarshal(m *Model) {
+	m.CanMarshal = true
+
+	for _, f := range m.Fields {
+		if f.IsMessage {
+			ctx.enableMarshal(ctx.modelLookup[f.Type])
+		}
+	}
+}
+
+func (ctx *APIContext) enableUnmarshal(m *Model) {
+	m.CanUnmarshal = true
+
+	for _, f := range m.Fields {
+		if f.IsMessage {
+			ctx.enableUnmarshal(ctx.modelLookup[f.Type])
+		}
+	}
+}
+
+func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorResponse_File, error) {
+	ctx := NewAPIContext()
 	pkg := d.GetPackage()
 
+	// Parse all Messages for generating typescript interfaces
 	for _, m := range d.GetMessageType() {
 		model := &Model{
 			Name: m.GetName(),
@@ -129,9 +189,10 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 			model.Fields = append(model.Fields, newField(f))
 		}
 
-		ctx.Models = append(ctx.Models, model)
+		ctx.AddModel(model)
 	}
 
+	// Parse all Services for generating typescript method interfaces and default client implementations
 	for _, s := range d.GetService() {
 		service := &Service{
 			Name:    s.GetName(),
@@ -173,6 +234,8 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 			}
 		}
 	}
+
+	ctx.ApplyMarshalFlags()
 
 	funcMap := template.FuncMap{
 		"stringify": stringify,
