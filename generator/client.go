@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"strings"
 	"text/template"
 
@@ -15,6 +16,7 @@ const apiTemplate = `
 import {createTwirpRequest, throwTwirpError, Fetch} from './twirp';
 
 {{range .Models}}
+{{- if not .Primitive}}
 export interface {{.Name}} {
     {{range .Fields -}}
     {{.Name}}: {{.Type}};
@@ -45,6 +47,7 @@ const JSONTo{{.Name}} = (m: {{.Name}}JSON): {{.Name}} => {
         {{end}}
     };
 };
+{{end -}}
 {{end -}}
 {{end}}
 
@@ -83,6 +86,7 @@ export class Default{{.Name}} implements {{.Name}} {
 
 type Model struct {
 	Name         string
+	Primitive    bool
 	Fields       []ModelField
 	CanMarshal   bool
 	CanUnmarshal bool
@@ -149,7 +153,11 @@ func (ctx *APIContext) ApplyMarshalFlags() {
 			}
 
 			if m.CanUnmarshal {
-				ctx.enableUnmarshal(ctx.modelLookup[baseType])
+				m, ok := ctx.modelLookup[baseType]
+				if !ok {
+					log.Fatalf("could not find model of type %s for field %s", baseType, f.Name)
+				}
+				ctx.enableUnmarshal(m)
 			}
 		}
 	}
@@ -159,9 +167,15 @@ func (ctx *APIContext) enableMarshal(m *Model) {
 	m.CanMarshal = true
 
 	for _, f := range m.Fields {
-		if f.IsMessage {
-			ctx.enableMarshal(ctx.modelLookup[f.Type])
+		// skip primitive types and WKT Timestamps
+		if !f.IsMessage || f.Type == "Date" {
+			continue
 		}
+		mm, ok := ctx.modelLookup[f.Type]
+		if !ok {
+			log.Fatalf("could not find model of type %s for field %s", f.Type, f.Name)
+		}
+		ctx.enableMarshal(mm)
 	}
 }
 
@@ -169,9 +183,15 @@ func (ctx *APIContext) enableUnmarshal(m *Model) {
 	m.CanUnmarshal = true
 
 	for _, f := range m.Fields {
-		if f.IsMessage {
-			ctx.enableUnmarshal(ctx.modelLookup[f.Type])
+		// skip primitive types and WKT Timestamps
+		if !f.IsMessage || f.Type == "Date" {
+			continue
 		}
+		mm, ok := ctx.modelLookup[f.Type]
+		if !ok {
+			log.Fatalf("could not find model of type %s for field %s", f.Type, f.Name)
+		}
+		ctx.enableUnmarshal(mm)
 	}
 }
 
@@ -234,6 +254,11 @@ func CreateClientAPI(d *descriptor.FileDescriptorProto) (*plugin.CodeGeneratorRe
 			}
 		}
 	}
+
+	ctx.AddModel(&Model{
+		Name:      "Date",
+		Primitive: true,
+	})
 
 	ctx.ApplyMarshalFlags()
 
