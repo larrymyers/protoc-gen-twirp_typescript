@@ -40,7 +40,7 @@ const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
 {{end -}}
 
 {{if .CanUnmarshal}}
-const JSONTo{{.Name}} = (m: {{.Name}}JSON): {{.Name}} => {
+const JSONTo{{.Name}} = (m: {{.Name}} | {{.Name}}JSON): {{.Name}} => {
     return {
         {{range .Fields -}}
         {{.Name}}: {{parse .}},
@@ -61,22 +61,28 @@ export interface {{.Name}} {
 export class Default{{.Name}} implements {{.Name}} {
     private hostname: string;
     private fetch: Fetch;
+	private writeCamelCase: boolean;
     private pathPrefix = "/twirp/{{.Package}}.{{.Name}}/";
 
-    constructor(hostname: string, fetch: Fetch) {
+    constructor(hostname: string, fetch: Fetch, writeCamelCase = false) {
         this.hostname = hostname;
         this.fetch = fetch;
+		this.writeCamelCase = writeCamelCase;
     }
 
     {{- range .Methods}}
     {{.Name}}({{.InputArg}}: {{.InputType}}): Promise<{{.OutputType}}> {
         const url = this.hostname + this.pathPrefix + "{{.Path}}";
-        return this.fetch(createTwirpRequest(url, {{.InputType}}ToJSON({{.InputArg}}))).then((resp) => {
-            if (!resp.ok) {
+		let body: {{.InputType}} | {{.InputType}}JSON = {{.InputArg}};
+		if(!this.writeCamelCase){
+			body = {{.InputType}}ToJSON({{.InputArg}});
+		}
+        return this.fetch(createTwirpRequest(url, body)).then((resp) => {
+ 			if (!resp.ok) {
                 return throwTwirpError(resp);
             }
 
-            return resp.json().then(JSONTo{{.OutputType}});
+			return resp.json().then(JSONTo{{.OutputType}});
         });
     }
     {{end}}
@@ -396,25 +402,30 @@ func stringify(f ModelField) string {
 }
 
 func parse(f ModelField) string {
+	field := "((m." + f.Name + ") ? m." + f.Name + " : m." + f.JSONName + ")"
+	if strings.Compare(f.Name, f.JSONName) == 0 {
+		field = "m." + f.Name
+	}
+
 	if f.IsRepeated {
 		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
 
 		if f.Type == "Date" {
-			return fmt.Sprintf("m.%s.map((n) => new Date(n))", f.JSONName)
+			return fmt.Sprintf("%s.map((n) => new Date(n))", field)
 		}
 
 		if f.IsMessage {
-			return fmt.Sprintf("m.%s.map(JSONTo%s)", f.JSONName, singularType)
+			return fmt.Sprintf("%s.map(JSONTo%s)", field, singularType)
 		}
 	}
 
 	if f.Type == "Date" {
-		return fmt.Sprintf("new Date(m.%s)", f.JSONName)
+		return fmt.Sprintf("new Date(%s)", field)
 	}
 
 	if f.IsMessage {
-		return fmt.Sprintf("JSONTo%s(m.%s)", f.Type, f.JSONName)
+		return fmt.Sprintf("JSONTo%s(%s)", f.Type, field)
 	}
 
-	return "m." + f.JSONName
+	return field
 }
