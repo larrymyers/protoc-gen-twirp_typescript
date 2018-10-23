@@ -380,7 +380,7 @@ func camelCase(s string) string {
 
 func stringify(f ModelField) string {
 	if f.IsRepeated {
-		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
+		singularType := strings.Trim(f.Type, "[]") // strip array brackets from type
 
 		if f.Type == "Date" {
 			return fmt.Sprintf("m.%s.map((n) => n.toISOString())", f.Name)
@@ -404,19 +404,22 @@ func stringify(f ModelField) string {
 
 func parse(f ModelField, modelName string) string {
 	field := "(((m as " + modelName + ")." + f.Name + ") ? (m as " + modelName + ")." + f.Name + " : (m as " + modelName + "JSON)." + f.JSONName + ")"
-	if strings.Compare(f.Name, f.JSONName) == 0 {
+	if f.Name == f.JSONName {
 		field = "m." + f.Name
 	}
 
 	if f.IsRepeated {
-		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
+		singularTSType := strings.Trim(f.Type, "[]")       // strip array brackets from type
+		singularJSONType := strings.Trim(f.JSONType, "[]") // strip array brackets from type
 
-		if f.Type == "Date" {
-			return fmt.Sprintf("%s.map((n) => new Date(n))", field)
+		arrayField := fmt.Sprintf("(%s as (%s | %s)[])", field, singularTSType, singularJSONType)
+
+		if f.Type == "Date[]" {
+			return fmt.Sprintf("%s.map((n) => new Date(n))", arrayField)
 		}
 
 		if f.IsMessage {
-			return fmt.Sprintf("%s.map(JSONTo%s)", field, singularType)
+			return fmt.Sprintf("%s.map(JSONTo%s)", arrayField, singularTSType)
 		}
 	}
 
