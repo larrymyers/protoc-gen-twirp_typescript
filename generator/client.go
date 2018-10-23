@@ -31,7 +31,7 @@ interface {{.Name}}JSON {
 
 {{if .CanMarshal}}
 const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
-	return {
+    return {
         {{range .Fields -}}
         {{.JSONName}}: {{stringify .}},
         {{end}}
@@ -54,7 +54,7 @@ const JSONTo{{.Name}} = (m: {{.Name}} | {{.Name}}JSON): {{.Name}} => {
 
 {{range .Services}}
 export interface {{.Name}} {
-	{{- range .Methods}}
+    {{- range .Methods}}
     {{.Name}}: ({{.InputArg}}: {{.InputType}}) => Promise<{{.OutputType}}>;
     {{end}}
 }
@@ -62,28 +62,28 @@ export interface {{.Name}} {
 export class Default{{.Name}} implements {{.Name}} {
     private hostname: string;
     private fetch: Fetch;
-	private writeCamelCase: boolean;
+    private writeCamelCase: boolean;
     private pathPrefix = "/twirp/{{.Package}}.{{.Name}}/";
 
     constructor(hostname: string, fetch: Fetch, writeCamelCase = false) {
         this.hostname = hostname;
         this.fetch = fetch;
-		this.writeCamelCase = writeCamelCase;
+        this.writeCamelCase = writeCamelCase;
     }
 
     {{- range .Methods}}
     {{.Name}}({{.InputArg}}: {{.InputType}}): Promise<{{.OutputType}}> {
         const url = this.hostname + this.pathPrefix + "{{.Path}}";
-		let body: {{.InputType}} | {{.InputType}}JSON = {{.InputArg}};
-		if(!this.writeCamelCase){
-			body = {{.InputType}}ToJSON({{.InputArg}});
-		}
+        let body: {{.InputType}} | {{.InputType}}JSON = {{.InputArg}};
+        if (!this.writeCamelCase) {
+            body = {{.InputType}}ToJSON({{.InputArg}});
+        }
         return this.fetch(createTwirpRequest(url, body)).then((resp) => {
- 			if (!resp.ok) {
+            if (!resp.ok) {
                 return throwTwirpError(resp);
             }
 
-			return resp.json().then(JSONTo{{.OutputType}});
+            return resp.json().then(JSONTo{{.OutputType}});
         });
     }
     {{end}}
