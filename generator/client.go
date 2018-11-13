@@ -31,7 +31,7 @@ interface {{.Name}}JSON {
 
 {{if .CanMarshal}}
 const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
-	return {
+    return {
         {{range .Fields -}}
         {{.JSONName}}: {{stringify .}},
         {{end}}
@@ -54,7 +54,7 @@ const JSONTo{{.Name}} = (m: {{.Name}} | {{.Name}}JSON): {{.Name}} => {
 
 {{range .Services}}
 export interface {{.Name}} {
-	{{- range .Methods}}
+    {{- range .Methods}}
     {{.Name}}: ({{.InputArg}}: {{.InputType}}) => Promise<{{.OutputType}}>;
     {{end}}
 }
@@ -62,28 +62,28 @@ export interface {{.Name}} {
 export class Default{{.Name}} implements {{.Name}} {
     private hostname: string;
     private fetch: Fetch;
-	private writeCamelCase: boolean;
+    private writeCamelCase: boolean;
     private pathPrefix = "/twirp/{{.Package}}.{{.Name}}/";
 
     constructor(hostname: string, fetch: Fetch, writeCamelCase = false) {
         this.hostname = hostname;
         this.fetch = fetch;
-		this.writeCamelCase = writeCamelCase;
+        this.writeCamelCase = writeCamelCase;
     }
 
     {{- range .Methods}}
     {{.Name}}({{.InputArg}}: {{.InputType}}): Promise<{{.OutputType}}> {
         const url = this.hostname + this.pathPrefix + "{{.Path}}";
-		let body: {{.InputType}} | {{.InputType}}JSON = {{.InputArg}};
-		if(!this.writeCamelCase){
-			body = {{.InputType}}ToJSON({{.InputArg}});
-		}
+        let body: {{.InputType}} | {{.InputType}}JSON = {{.InputArg}};
+        if (!this.writeCamelCase) {
+            body = {{.InputType}}ToJSON({{.InputArg}});
+        }
         return this.fetch(createTwirpRequest(url, body)).then((resp) => {
- 			if (!resp.ok) {
+            if (!resp.ok) {
                 return throwTwirpError(resp);
             }
 
-			return resp.json().then(JSONTo{{.OutputType}});
+            return resp.json().then(JSONTo{{.OutputType}});
         });
     }
     {{end}}
@@ -380,7 +380,7 @@ func camelCase(s string) string {
 
 func stringify(f ModelField) string {
 	if f.IsRepeated {
-		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
+		singularType := strings.Trim(f.Type, "[]") // strip array brackets from type
 
 		if f.Type == "Date" {
 			return fmt.Sprintf("m.%s.map((n) => n.toISOString())", f.Name)
@@ -404,19 +404,22 @@ func stringify(f ModelField) string {
 
 func parse(f ModelField, modelName string) string {
 	field := "(((m as " + modelName + ")." + f.Name + ") ? (m as " + modelName + ")." + f.Name + " : (m as " + modelName + "JSON)." + f.JSONName + ")"
-	if strings.Compare(f.Name, f.JSONName) == 0 {
+	if f.Name == f.JSONName {
 		field = "m." + f.Name
 	}
 
 	if f.IsRepeated {
-		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
+		singularTSType := strings.Trim(f.Type, "[]")       // strip array brackets from type
+		singularJSONType := strings.Trim(f.JSONType, "[]") // strip array brackets from type
 
-		if f.Type == "Date" {
-			return fmt.Sprintf("%s.map((n) => new Date(n))", field)
+		arrayField := fmt.Sprintf("(%s as (%s | %s)[])", field, singularTSType, singularJSONType)
+
+		if f.Type == "Date[]" {
+			return fmt.Sprintf("%s.map((n) => new Date(n))", arrayField)
 		}
 
 		if f.IsMessage {
-			return fmt.Sprintf("%s.map(JSONTo%s)", field, singularType)
+			return fmt.Sprintf("%s.map(JSONTo%s)", arrayField, singularTSType)
 		}
 	}
 
