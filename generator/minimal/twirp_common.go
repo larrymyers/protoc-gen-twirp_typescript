@@ -1,4 +1,4 @@
-package generator
+package minimal
 
 import (
 	"github.com/golang/protobuf/proto"
