@@ -25,7 +25,7 @@ const getServiceMethodName = (fn: any): string => {
 	{{- end}}
 	{{- end}}
 
-    throw 'Unknown Method';
+    throw new Error('Unknown Method');
 };
 
 {{range .Services}}
