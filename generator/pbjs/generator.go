@@ -19,13 +19,13 @@ import Axios from 'axios';
 const getServiceMethodName = (fn: any): string => {
     {{- range $s := .Services}}
 	{{- range $m := $s.Methods}}
-	if (fn == {{$s.Package}}.{{$s.Name}}.prototype.{{lowerCamel $m}}) {
+	if (fn === {{$s.Package}}.{{$s.Name}}.prototype.{{lowerCamel $m}}) {
 		return '{{$m}}';
     }
 	{{- end}}
 	{{- end}}
 
-    throw 'Unknown Method';
+    throw new Error('Unknown Method');
 };
 
 {{range .Services}}
