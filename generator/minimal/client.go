@@ -3,8 +3,8 @@ package minimal
 import (
 	"bytes"
 	"fmt"
-	"path"
 	"log"
+	"path"
 	"strings"
 	"text/template"
 
@@ -53,6 +53,8 @@ const JSONTo{{.Name}} = (m: {{.Name}} | {{.Name}}JSON): {{.Name}} => {
 {{end -}}
 {{end}}
 
+{{- $twirpPrefix := .TwirpPrefix -}}
+
 {{range .Services}}
 export interface {{.Name}} {
     {{- range .Methods}}
@@ -64,7 +66,7 @@ export class Default{{.Name}} implements {{.Name}} {
     private hostname: string;
     private fetch: Fetch;
     private writeCamelCase: boolean;
-    private pathPrefix = "/twirp/{{.Package}}.{{.Name}}/";
+    private pathPrefix = "{{$twirpPrefix}}/{{.Package}}.{{.Name}}/";
 
     constructor(hostname: string, fetch: Fetch, writeCamelCase = false) {
         this.hostname = hostname;
@@ -123,8 +125,13 @@ type ServiceMethod struct {
 	OutputType string
 }
 
-func NewAPIContext() APIContext {
-	ctx := APIContext{}
+func NewAPIContext(twirpVersion string) APIContext {
+	twirpPrefix := "/twirp"
+	if twirpVersion == "v6" {
+		twirpPrefix = ""
+	}
+
+	ctx := APIContext{TwirpPrefix: twirpPrefix}
 	ctx.modelLookup = make(map[string]*Model)
 
 	return ctx
@@ -133,6 +140,7 @@ func NewAPIContext() APIContext {
 type APIContext struct {
 	Models      []*Model
 	Services    []*Service
+	TwirpPrefix string
 	modelLookup map[string]*Model
 }
 
@@ -203,12 +211,13 @@ func (ctx *APIContext) enableUnmarshal(m *Model) {
 	}
 }
 
-func NewGenerator(p map[string]string) *Generator {
-	return &Generator{params: p}
+func NewGenerator(twirpVersion string, p map[string]string) *Generator {
+	return &Generator{twirpVersion: twirpVersion, params: p}
 }
 
 type Generator struct {
-	params map[string]string
+	twirpVersion string
+	params       map[string]string
 }
 
 func (g *Generator) Generate(d *descriptor.FileDescriptorProto) ([]*plugin.CodeGeneratorResponse_File, error) {
@@ -219,7 +228,7 @@ func (g *Generator) Generate(d *descriptor.FileDescriptorProto) ([]*plugin.CodeG
 		return files, nil
 	}
 
-	ctx := NewAPIContext()
+	ctx := NewAPIContext(g.twirpVersion)
 	pkg := d.GetPackage()
 
 	// Parse all Messages for generating typescript interfaces

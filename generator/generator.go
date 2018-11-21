@@ -1,6 +1,8 @@
 package generator
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
@@ -30,11 +32,20 @@ type Generator interface {
 	Generate(d *descriptor.FileDescriptorProto) ([]*plugin.CodeGeneratorResponse_File, error)
 }
 
-func NewGenerator(p map[string]string) Generator {
-	lib, ok := p["library"]
-	if ok && lib == "pbjs" {
-		return pbjs.NewGenerator()
+func NewGenerator(p map[string]string) (Generator, error) {
+	version, ok := p["version"]
+	if !ok {
+		version = "v5"
 	}
 
-	return minimal.NewGenerator(p)
+	if version != "v5" && version != "v6" {
+		return nil, errors.New(fmt.Sprintf("version is %s, must be v5 or v6", version))
+	}
+
+	lib, ok := p["library"]
+	if ok && lib == "pbjs" {
+		return pbjs.NewGenerator(version), nil
+	}
+
+	return minimal.NewGenerator(version, p), nil
 }

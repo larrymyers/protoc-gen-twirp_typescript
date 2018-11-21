@@ -28,5 +28,14 @@ This is different behavior than the twirp Go plugin, which places the files rela
 This decision is intentional, since only client code destination is likely somewhere different
 than the server code.
 
+### Generating Code for Twirp v6
+
+By default code is generated that supports the twirp v5 spec. If you want to use the the v6 prerelease specify the 
+version using protoc params.
+
+    protoc --twirp_typescript_out=version=v6:<path-to-project> <path-to-proto-file>
+    
+The relevant change here is the routing path, which now starts with the proto package instead of "twirp/".
+
 * [Minimal JSON Client Usage](doc/minimal.md)
 * [Protobuf.js Client Usage](doc/protobufjs.md)

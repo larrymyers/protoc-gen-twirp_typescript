@@ -16,6 +16,8 @@ import {{pbjsImport .Package}} from './{{.ImportPath}}.pb';
 import {createTwirpAdapter} from 'pbjs-twirp';
 import Axios from 'axios';
 
+{{$twirpPrefix := .TwirpPrefix -}}
+
 const getServiceMethodName = (fn: any): string => {
     {{- range $s := .Services}}
 	{{- range $m := $s.Methods}}
@@ -29,7 +31,7 @@ const getServiceMethodName = (fn: any): string => {
 };
 
 {{range .Services}}
-export const {{.Name}}PathPrefix = '/twirp/{{.Package}}.{{.Name}}/';
+export const {{.Name}}PathPrefix = '{{$twirpPrefix}}/{{.Package}}.{{.Name}}/';
 
 export const create{{.Name}} = (baseURL: string): {{.Package}}.{{.Name}} => {
 	const axios = Axios.create({
@@ -48,16 +50,19 @@ type service struct {
 }
 
 type tmplContext struct {
-	Services   []service
-	Package    string
-	ImportPath string
+	Services    []service
+	Package     string
+	ImportPath  string
+	TwirpPrefix string
 }
 
-func NewGenerator() *Generator {
-	return &Generator{}
+func NewGenerator(twirpVersion string) *Generator {
+	return &Generator{twirpVersion: twirpVersion}
 }
 
-type Generator struct{}
+type Generator struct {
+	twirpVersion string
+}
 
 func (g *Generator) Generate(d *descriptor.FileDescriptorProto) ([]*plugin.CodeGeneratorResponse_File, error) {
 	// skip WKT Timestamp, we don't do any special serialization for jsonpb.
@@ -65,10 +70,16 @@ func (g *Generator) Generate(d *descriptor.FileDescriptorProto) ([]*plugin.CodeG
 		return []*plugin.CodeGeneratorResponse_File{}, nil
 	}
 
+	twirpPrefix := "/twirp"
+	if g.twirpVersion == "v6" {
+		twirpPrefix = ""
+	}
+
 	pkg := d.GetPackage()
 	ctx := tmplContext{
-		Package:    pkg,
-		ImportPath: baseName(d),
+		Package:     pkg,
+		ImportPath:  baseName(d),
+		TwirpPrefix: twirpPrefix,
 	}
 
 	for _, s := range d.Service {
