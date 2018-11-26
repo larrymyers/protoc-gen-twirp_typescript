@@ -1,5 +1,11 @@
 # Twirp Minimal JSON Client
 
+If you want to just use JSON over the wire instead of protobuf, use this client. It produces a very compact module
+that will add minimal overhead to a project.
+
+The caveat is that it does not have full support for the protobuf spec. If you need full support 
+(nested messages, Any type, etc.) please use the protobuf.js variant.
+
 ## Usage
 
     go get -u go.larrymyers.com/protoc-gen-twirp_typescript

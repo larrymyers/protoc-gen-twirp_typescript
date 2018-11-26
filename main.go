@@ -36,7 +36,12 @@ func readRequest(r io.Reader) *plugin.CodeGeneratorRequest {
 func generate(in *plugin.CodeGeneratorRequest) *plugin.CodeGeneratorResponse {
 	resp := &plugin.CodeGeneratorResponse{}
 	params := generator.GetParameters(in)
-	gen := generator.NewGenerator(params)
+
+	gen, err := generator.NewGenerator(params)
+	if err != nil {
+		resp.Error = proto.String(err.Error())
+		return resp
+	}
 
 	for _, f := range in.GetProtoFile() {
 		files, err := gen.Generate(f)
