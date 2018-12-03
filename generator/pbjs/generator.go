@@ -33,7 +33,10 @@ export const {{.Name}}PathPrefix = '/twirp/{{.Package}}.{{.Name}}/';
 
 export const create{{.Name}} = (baseURL: string): {{.Package}}.{{.Name}} => {
 	const axios = Axios.create({
-        baseURL: baseURL + {{.Name}}PathPrefix
+        baseURL: baseURL + {{.Name}}PathPrefix,
+        headers: {
+          Accept: 'application/protobuf'
+        }
     });
 
     return {{.Package}}.{{.Name}}.create(createTwirpAdapter(axios, getServiceMethodName));
