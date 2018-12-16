@@ -1,16 +1,17 @@
 /*eslint-disable block-scoped-var, id-length, no-control-regex, no-magic-numbers, no-prototype-builtins, no-redeclare, no-shadow, no-var, sort-vars*/
-"use strict";
+'use strict';
 
-var $protobuf = require("protobufjs/minimal");
+var $protobuf = require('protobufjs/minimal');
 
 // Common aliases
-var $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
+var $Reader = $protobuf.Reader,
+    $Writer = $protobuf.Writer,
+    $util = $protobuf.util;
 
 // Exported root namespace
-var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
+var $root = $protobuf.roots['default'] || ($protobuf.roots['default'] = {});
 
 $root.twitch = (function() {
-
     /**
      * Namespace twitch.
      * @exports twitch
@@ -19,7 +20,6 @@ $root.twitch = (function() {
     var twitch = {};
 
     twitch.twirp = (function() {
-
         /**
          * Namespace twirp.
          * @memberof twitch
@@ -28,7 +28,6 @@ $root.twitch = (function() {
         var twirp = {};
 
         twirp.example = (function() {
-
             /**
              * Namespace example.
              * @memberof twitch.twirp
@@ -37,7 +36,6 @@ $root.twitch = (function() {
             var example = {};
 
             example.Hat = (function() {
-
                 /**
                  * Properties of a Hat.
                  * @memberof twitch.twirp.example
@@ -58,7 +56,11 @@ $root.twitch = (function() {
                  */
                 function Hat(properties) {
                     if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        for (
+                            var keys = Object.keys(properties), i = 0;
+                            i < keys.length;
+                            ++i
+                        )
                             if (properties[keys[i]] != null)
                                 this[keys[i]] = properties[keys[i]];
                 }
@@ -77,7 +79,7 @@ $root.twitch = (function() {
                  * @memberof twitch.twirp.example.Hat
                  * @instance
                  */
-                Hat.prototype.color = "";
+                Hat.prototype.color = '';
 
                 /**
                  * Hat name.
@@ -85,7 +87,7 @@ $root.twitch = (function() {
                  * @memberof twitch.twirp.example.Hat
                  * @instance
                  */
-                Hat.prototype.name = "";
+                Hat.prototype.name = '';
 
                 /**
                  * Hat createdOn.
@@ -117,16 +119,30 @@ $root.twitch = (function() {
                  * @returns {$protobuf.Writer} Writer
                  */
                 Hat.encode = function encode(message, writer) {
-                    if (!writer)
-                        writer = $Writer.create();
-                    if (message.size != null && message.hasOwnProperty("size"))
-                        writer.uint32(/* id 1, wireType 0 =*/8).int32(message.size);
-                    if (message.color != null && message.hasOwnProperty("color"))
-                        writer.uint32(/* id 2, wireType 2 =*/18).string(message.color);
-                    if (message.name != null && message.hasOwnProperty("name"))
-                        writer.uint32(/* id 3, wireType 2 =*/26).string(message.name);
-                    if (message.createdOn != null && message.hasOwnProperty("createdOn"))
-                        $root.google.protobuf.Timestamp.encode(message.createdOn, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+                    if (!writer) writer = $Writer.create();
+                    if (message.size != null && message.hasOwnProperty('size'))
+                        writer
+                            .uint32(/* id 1, wireType 0 =*/ 8)
+                            .int32(message.size);
+                    if (
+                        message.color != null &&
+                        message.hasOwnProperty('color')
+                    )
+                        writer
+                            .uint32(/* id 2, wireType 2 =*/ 18)
+                            .string(message.color);
+                    if (message.name != null && message.hasOwnProperty('name'))
+                        writer
+                            .uint32(/* id 3, wireType 2 =*/ 26)
+                            .string(message.name);
+                    if (
+                        message.createdOn != null &&
+                        message.hasOwnProperty('createdOn')
+                    )
+                        $root.google.protobuf.Timestamp.encode(
+                            message.createdOn,
+                            writer.uint32(/* id 4, wireType 2 =*/ 34).fork()
+                        ).ldelim();
                     return writer;
                 };
 
@@ -139,7 +155,10 @@ $root.twitch = (function() {
                  * @param {$protobuf.Writer} [writer] Writer to encode to
                  * @returns {$protobuf.Writer} Writer
                  */
-                Hat.encodeDelimited = function encodeDelimited(message, writer) {
+                Hat.encodeDelimited = function encodeDelimited(
+                    message,
+                    writer
+                ) {
                     return this.encode(message, writer).ldelim();
                 };
 
@@ -157,25 +176,32 @@ $root.twitch = (function() {
                 Hat.decode = function decode(reader, length) {
                     if (!(reader instanceof $Reader))
                         reader = $Reader.create(reader);
-                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.twitch.twirp.example.Hat();
+                    var end =
+                            length === undefined
+                                ? reader.len
+                                : reader.pos + length,
+                        message = new $root.twitch.twirp.example.Hat();
                     while (reader.pos < end) {
                         var tag = reader.uint32();
                         switch (tag >>> 3) {
-                        case 1:
-                            message.size = reader.int32();
-                            break;
-                        case 2:
-                            message.color = reader.string();
-                            break;
-                        case 3:
-                            message.name = reader.string();
-                            break;
-                        case 4:
-                            message.createdOn = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
-                            break;
-                        default:
-                            reader.skipType(tag & 7);
-                            break;
+                            case 1:
+                                message.size = reader.int32();
+                                break;
+                            case 2:
+                                message.color = reader.string();
+                                break;
+                            case 3:
+                                message.name = reader.string();
+                                break;
+                            case 4:
+                                message.createdOn = $root.google.protobuf.Timestamp.decode(
+                                    reader,
+                                    reader.uint32()
+                                );
+                                break;
+                            default:
+                                reader.skipType(tag & 7);
+                                break;
                         }
                     }
                     return message;
@@ -206,21 +232,28 @@ $root.twitch = (function() {
                  * @returns {string|null} `null` if valid, otherwise the reason why it is not
                  */
                 Hat.verify = function verify(message) {
-                    if (typeof message !== "object" || message === null)
-                        return "object expected";
-                    if (message.size != null && message.hasOwnProperty("size"))
+                    if (typeof message !== 'object' || message === null)
+                        return 'object expected';
+                    if (message.size != null && message.hasOwnProperty('size'))
                         if (!$util.isInteger(message.size))
-                            return "size: integer expected";
-                    if (message.color != null && message.hasOwnProperty("color"))
+                            return 'size: integer expected';
+                    if (
+                        message.color != null &&
+                        message.hasOwnProperty('color')
+                    )
                         if (!$util.isString(message.color))
-                            return "color: string expected";
-                    if (message.name != null && message.hasOwnProperty("name"))
+                            return 'color: string expected';
+                    if (message.name != null && message.hasOwnProperty('name'))
                         if (!$util.isString(message.name))
-                            return "name: string expected";
-                    if (message.createdOn != null && message.hasOwnProperty("createdOn")) {
-                        var error = $root.google.protobuf.Timestamp.verify(message.createdOn);
-                        if (error)
-                            return "createdOn." + error;
+                            return 'name: string expected';
+                    if (
+                        message.createdOn != null &&
+                        message.hasOwnProperty('createdOn')
+                    ) {
+                        var error = $root.google.protobuf.Timestamp.verify(
+                            message.createdOn
+                        );
+                        if (error) return 'createdOn.' + error;
                     }
                     return null;
                 };
@@ -237,16 +270,18 @@ $root.twitch = (function() {
                     if (object instanceof $root.twitch.twirp.example.Hat)
                         return object;
                     var message = new $root.twitch.twirp.example.Hat();
-                    if (object.size != null)
-                        message.size = object.size | 0;
+                    if (object.size != null) message.size = object.size | 0;
                     if (object.color != null)
                         message.color = String(object.color);
-                    if (object.name != null)
-                        message.name = String(object.name);
+                    if (object.name != null) message.name = String(object.name);
                     if (object.createdOn != null) {
-                        if (typeof object.createdOn !== "object")
-                            throw TypeError(".twitch.twirp.example.Hat.createdOn: object expected");
-                        message.createdOn = $root.google.protobuf.Timestamp.fromObject(object.createdOn);
+                        if (typeof object.createdOn !== 'object')
+                            throw TypeError(
+                                '.twitch.twirp.example.Hat.createdOn: object expected'
+                            );
+                        message.createdOn = $root.google.protobuf.Timestamp.fromObject(
+                            object.createdOn
+                        );
                     }
                     return message;
                 };
@@ -261,23 +296,31 @@ $root.twitch = (function() {
                  * @returns {Object.<string,*>} Plain object
                  */
                 Hat.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
+                    if (!options) options = {};
                     var object = {};
                     if (options.defaults) {
                         object.size = 0;
-                        object.color = "";
-                        object.name = "";
+                        object.color = '';
+                        object.name = '';
                         object.createdOn = null;
                     }
-                    if (message.size != null && message.hasOwnProperty("size"))
+                    if (message.size != null && message.hasOwnProperty('size'))
                         object.size = message.size;
-                    if (message.color != null && message.hasOwnProperty("color"))
+                    if (
+                        message.color != null &&
+                        message.hasOwnProperty('color')
+                    )
                         object.color = message.color;
-                    if (message.name != null && message.hasOwnProperty("name"))
+                    if (message.name != null && message.hasOwnProperty('name'))
                         object.name = message.name;
-                    if (message.createdOn != null && message.hasOwnProperty("createdOn"))
-                        object.createdOn = $root.google.protobuf.Timestamp.toObject(message.createdOn, options);
+                    if (
+                        message.createdOn != null &&
+                        message.hasOwnProperty('createdOn')
+                    )
+                        object.createdOn = $root.google.protobuf.Timestamp.toObject(
+                            message.createdOn,
+                            options
+                        );
                     return object;
                 };
 
@@ -289,14 +332,16 @@ $root.twitch = (function() {
                  * @returns {Object.<string,*>} JSON object
                  */
                 Hat.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    return this.constructor.toObject(
+                        this,
+                        $protobuf.util.toJSONOptions
+                    );
                 };
 
                 return Hat;
             })();
 
             example.Size = (function() {
-
                 /**
                  * Properties of a Size.
                  * @memberof twitch.twirp.example
@@ -314,7 +359,11 @@ $root.twitch = (function() {
                  */
                 function Size(properties) {
                     if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        for (
+                            var keys = Object.keys(properties), i = 0;
+                            i < keys.length;
+                            ++i
+                        )
                             if (properties[keys[i]] != null)
                                 this[keys[i]] = properties[keys[i]];
                 }
@@ -349,10 +398,14 @@ $root.twitch = (function() {
                  * @returns {$protobuf.Writer} Writer
                  */
                 Size.encode = function encode(message, writer) {
-                    if (!writer)
-                        writer = $Writer.create();
-                    if (message.inches != null && message.hasOwnProperty("inches"))
-                        writer.uint32(/* id 1, wireType 0 =*/8).int32(message.inches);
+                    if (!writer) writer = $Writer.create();
+                    if (
+                        message.inches != null &&
+                        message.hasOwnProperty('inches')
+                    )
+                        writer
+                            .uint32(/* id 1, wireType 0 =*/ 8)
+                            .int32(message.inches);
                     return writer;
                 };
 
@@ -365,7 +418,10 @@ $root.twitch = (function() {
                  * @param {$protobuf.Writer} [writer] Writer to encode to
                  * @returns {$protobuf.Writer} Writer
                  */
-                Size.encodeDelimited = function encodeDelimited(message, writer) {
+                Size.encodeDelimited = function encodeDelimited(
+                    message,
+                    writer
+                ) {
                     return this.encode(message, writer).ldelim();
                 };
 
@@ -383,16 +439,20 @@ $root.twitch = (function() {
                 Size.decode = function decode(reader, length) {
                     if (!(reader instanceof $Reader))
                         reader = $Reader.create(reader);
-                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.twitch.twirp.example.Size();
+                    var end =
+                            length === undefined
+                                ? reader.len
+                                : reader.pos + length,
+                        message = new $root.twitch.twirp.example.Size();
                     while (reader.pos < end) {
                         var tag = reader.uint32();
                         switch (tag >>> 3) {
-                        case 1:
-                            message.inches = reader.int32();
-                            break;
-                        default:
-                            reader.skipType(tag & 7);
-                            break;
+                            case 1:
+                                message.inches = reader.int32();
+                                break;
+                            default:
+                                reader.skipType(tag & 7);
+                                break;
                         }
                     }
                     return message;
@@ -423,11 +483,14 @@ $root.twitch = (function() {
                  * @returns {string|null} `null` if valid, otherwise the reason why it is not
                  */
                 Size.verify = function verify(message) {
-                    if (typeof message !== "object" || message === null)
-                        return "object expected";
-                    if (message.inches != null && message.hasOwnProperty("inches"))
+                    if (typeof message !== 'object' || message === null)
+                        return 'object expected';
+                    if (
+                        message.inches != null &&
+                        message.hasOwnProperty('inches')
+                    )
                         if (!$util.isInteger(message.inches))
-                            return "inches: integer expected";
+                            return 'inches: integer expected';
                     return null;
                 };
 
@@ -458,12 +521,13 @@ $root.twitch = (function() {
                  * @returns {Object.<string,*>} Plain object
                  */
                 Size.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
+                    if (!options) options = {};
                     var object = {};
-                    if (options.defaults)
-                        object.inches = 0;
-                    if (message.inches != null && message.hasOwnProperty("inches"))
+                    if (options.defaults) object.inches = 0;
+                    if (
+                        message.inches != null &&
+                        message.hasOwnProperty('inches')
+                    )
                         object.inches = message.inches;
                     return object;
                 };
@@ -476,14 +540,16 @@ $root.twitch = (function() {
                  * @returns {Object.<string,*>} JSON object
                  */
                 Size.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    return this.constructor.toObject(
+                        this,
+                        $protobuf.util.toJSONOptions
+                    );
                 };
 
                 return Size;
             })();
 
             example.Haberdasher = (function() {
-
                 /**
                  * Constructs a new Haberdasher service.
                  * @memberof twitch.twirp.example
@@ -494,11 +560,22 @@ $root.twitch = (function() {
                  * @param {boolean} [requestDelimited=false] Whether requests are length-delimited
                  * @param {boolean} [responseDelimited=false] Whether responses are length-delimited
                  */
-                function Haberdasher(rpcImpl, requestDelimited, responseDelimited) {
-                    $protobuf.rpc.Service.call(this, rpcImpl, requestDelimited, responseDelimited);
+                function Haberdasher(
+                    rpcImpl,
+                    requestDelimited,
+                    responseDelimited
+                ) {
+                    $protobuf.rpc.Service.call(
+                        this,
+                        rpcImpl,
+                        requestDelimited,
+                        responseDelimited
+                    );
                 }
 
-                (Haberdasher.prototype = Object.create($protobuf.rpc.Service.prototype)).constructor = Haberdasher;
+                (Haberdasher.prototype = Object.create(
+                    $protobuf.rpc.Service.prototype
+                )).constructor = Haberdasher;
 
                 /**
                  * Creates new Haberdasher service using the specified rpc implementation.
@@ -510,8 +587,16 @@ $root.twitch = (function() {
                  * @param {boolean} [responseDelimited=false] Whether responses are length-delimited
                  * @returns {Haberdasher} RPC service. Useful where requests and/or responses are streamed.
                  */
-                Haberdasher.create = function create(rpcImpl, requestDelimited, responseDelimited) {
-                    return new this(rpcImpl, requestDelimited, responseDelimited);
+                Haberdasher.create = function create(
+                    rpcImpl,
+                    requestDelimited,
+                    responseDelimited
+                ) {
+                    return new this(
+                        rpcImpl,
+                        requestDelimited,
+                        responseDelimited
+                    );
                 };
 
                 /**
@@ -533,9 +618,22 @@ $root.twitch = (function() {
                  * @returns {undefined}
                  * @variation 1
                  */
-                Object.defineProperty(Haberdasher.prototype.makeHat = function makeHat(request, callback) {
-                    return this.rpcCall(makeHat, $root.twitch.twirp.example.Size, $root.twitch.twirp.example.Hat, request, callback);
-                }, "name", { value: "MakeHat" });
+                Object.defineProperty(
+                    (Haberdasher.prototype.makeHat = function makeHat(
+                        request,
+                        callback
+                    ) {
+                        return this.rpcCall(
+                            makeHat,
+                            $root.twitch.twirp.example.Size,
+                            $root.twitch.twirp.example.Hat,
+                            request,
+                            callback
+                        );
+                    }),
+                    'name',
+                    { value: 'MakeHat' }
+                );
 
                 /**
                  * Calls MakeHat.
@@ -560,7 +658,6 @@ $root.twitch = (function() {
 })();
 
 $root.google = (function() {
-
     /**
      * Namespace google.
      * @exports google
@@ -569,7 +666,6 @@ $root.google = (function() {
     var google = {};
 
     google.protobuf = (function() {
-
         /**
          * Namespace protobuf.
          * @memberof google
@@ -578,7 +674,6 @@ $root.google = (function() {
         var protobuf = {};
 
         protobuf.Timestamp = (function() {
-
             /**
              * Properties of a Timestamp.
              * @memberof google.protobuf
@@ -597,7 +692,11 @@ $root.google = (function() {
              */
             function Timestamp(properties) {
                 if (properties)
-                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    for (
+                        var keys = Object.keys(properties), i = 0;
+                        i < keys.length;
+                        ++i
+                    )
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
@@ -608,7 +707,9 @@ $root.google = (function() {
              * @memberof google.protobuf.Timestamp
              * @instance
              */
-            Timestamp.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+            Timestamp.prototype.seconds = $util.Long
+                ? $util.Long.fromBits(0, 0, false)
+                : 0;
 
             /**
              * Timestamp nanos.
@@ -640,12 +741,18 @@ $root.google = (function() {
              * @returns {$protobuf.Writer} Writer
              */
             Timestamp.encode = function encode(message, writer) {
-                if (!writer)
-                    writer = $Writer.create();
-                if (message.seconds != null && message.hasOwnProperty("seconds"))
-                    writer.uint32(/* id 1, wireType 0 =*/8).int64(message.seconds);
-                if (message.nanos != null && message.hasOwnProperty("nanos"))
-                    writer.uint32(/* id 2, wireType 0 =*/16).int32(message.nanos);
+                if (!writer) writer = $Writer.create();
+                if (
+                    message.seconds != null &&
+                    message.hasOwnProperty('seconds')
+                )
+                    writer
+                        .uint32(/* id 1, wireType 0 =*/ 8)
+                        .int64(message.seconds);
+                if (message.nanos != null && message.hasOwnProperty('nanos'))
+                    writer
+                        .uint32(/* id 2, wireType 0 =*/ 16)
+                        .int32(message.nanos);
                 return writer;
             };
 
@@ -658,7 +765,10 @@ $root.google = (function() {
              * @param {$protobuf.Writer} [writer] Writer to encode to
              * @returns {$protobuf.Writer} Writer
              */
-            Timestamp.encodeDelimited = function encodeDelimited(message, writer) {
+            Timestamp.encodeDelimited = function encodeDelimited(
+                message,
+                writer
+            ) {
                 return this.encode(message, writer).ldelim();
             };
 
@@ -676,19 +786,21 @@ $root.google = (function() {
             Timestamp.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.protobuf.Timestamp();
+                var end =
+                        length === undefined ? reader.len : reader.pos + length,
+                    message = new $root.google.protobuf.Timestamp();
                 while (reader.pos < end) {
                     var tag = reader.uint32();
                     switch (tag >>> 3) {
-                    case 1:
-                        message.seconds = reader.int64();
-                        break;
-                    case 2:
-                        message.nanos = reader.int32();
-                        break;
-                    default:
-                        reader.skipType(tag & 7);
-                        break;
+                        case 1:
+                            message.seconds = reader.int64();
+                            break;
+                        case 2:
+                            message.nanos = reader.int32();
+                            break;
+                        default:
+                            reader.skipType(tag & 7);
+                            break;
                     }
                 }
                 return message;
@@ -705,8 +817,7 @@ $root.google = (function() {
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
             Timestamp.decodeDelimited = function decodeDelimited(reader) {
-                if (!(reader instanceof $Reader))
-                    reader = new $Reader(reader);
+                if (!(reader instanceof $Reader)) reader = new $Reader(reader);
                 return this.decode(reader, reader.uint32());
             };
 
@@ -719,14 +830,24 @@ $root.google = (function() {
              * @returns {string|null} `null` if valid, otherwise the reason why it is not
              */
             Timestamp.verify = function verify(message) {
-                if (typeof message !== "object" || message === null)
-                    return "object expected";
-                if (message.seconds != null && message.hasOwnProperty("seconds"))
-                    if (!$util.isInteger(message.seconds) && !(message.seconds && $util.isInteger(message.seconds.low) && $util.isInteger(message.seconds.high)))
-                        return "seconds: integer|Long expected";
-                if (message.nanos != null && message.hasOwnProperty("nanos"))
+                if (typeof message !== 'object' || message === null)
+                    return 'object expected';
+                if (
+                    message.seconds != null &&
+                    message.hasOwnProperty('seconds')
+                )
+                    if (
+                        !$util.isInteger(message.seconds) &&
+                        !(
+                            message.seconds &&
+                            $util.isInteger(message.seconds.low) &&
+                            $util.isInteger(message.seconds.high)
+                        )
+                    )
+                        return 'seconds: integer|Long expected';
+                if (message.nanos != null && message.hasOwnProperty('nanos'))
                     if (!$util.isInteger(message.nanos))
-                        return "nanos: integer expected";
+                        return 'nanos: integer expected';
                 return null;
             };
 
@@ -744,15 +865,19 @@ $root.google = (function() {
                 var message = new $root.google.protobuf.Timestamp();
                 if (object.seconds != null)
                     if ($util.Long)
-                        (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
-                    else if (typeof object.seconds === "string")
+                        (message.seconds = $util.Long.fromValue(
+                            object.seconds
+                        )).unsigned = false;
+                    else if (typeof object.seconds === 'string')
                         message.seconds = parseInt(object.seconds, 10);
-                    else if (typeof object.seconds === "number")
+                    else if (typeof object.seconds === 'number')
                         message.seconds = object.seconds;
-                    else if (typeof object.seconds === "object")
-                        message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
-                if (object.nanos != null)
-                    message.nanos = object.nanos | 0;
+                    else if (typeof object.seconds === 'object')
+                        message.seconds = new $util.LongBits(
+                            object.seconds.low >>> 0,
+                            object.seconds.high >>> 0
+                        ).toNumber();
+                if (object.nanos != null) message.nanos = object.nanos | 0;
                 return message;
             };
 
@@ -766,23 +891,42 @@ $root.google = (function() {
              * @returns {Object.<string,*>} Plain object
              */
             Timestamp.toObject = function toObject(message, options) {
-                if (!options)
-                    options = {};
+                if (!options) options = {};
                 var object = {};
                 if (options.defaults) {
                     if ($util.Long) {
                         var long = new $util.Long(0, 0, false);
-                        object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                    } else
-                        object.seconds = options.longs === String ? "0" : 0;
+                        object.seconds =
+                            options.longs === String
+                                ? long.toString()
+                                : options.longs === Number
+                                ? long.toNumber()
+                                : long;
+                    } else object.seconds = options.longs === String ? '0' : 0;
                     object.nanos = 0;
                 }
-                if (message.seconds != null && message.hasOwnProperty("seconds"))
-                    if (typeof message.seconds === "number")
-                        object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
+                if (
+                    message.seconds != null &&
+                    message.hasOwnProperty('seconds')
+                )
+                    if (typeof message.seconds === 'number')
+                        object.seconds =
+                            options.longs === String
+                                ? String(message.seconds)
+                                : message.seconds;
                     else
-                        object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
-                if (message.nanos != null && message.hasOwnProperty("nanos"))
+                        object.seconds =
+                            options.longs === String
+                                ? $util.Long.prototype.toString.call(
+                                      message.seconds
+                                  )
+                                : options.longs === Number
+                                ? new $util.LongBits(
+                                      message.seconds.low >>> 0,
+                                      message.seconds.high >>> 0
+                                  ).toNumber()
+                                : message.seconds;
+                if (message.nanos != null && message.hasOwnProperty('nanos'))
                     object.nanos = message.nanos;
                 return object;
             };
@@ -795,7 +939,10 @@ $root.google = (function() {
              * @returns {Object.<string,*>} JSON object
              */
             Timestamp.prototype.toJSON = function toJSON() {
-                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                return this.constructor.toObject(
+                    this,
+                    $protobuf.util.toJSONOptions
+                );
             };
 
             return Timestamp;

@@ -1,5 +1,5 @@
-import {AxiosError, AxiosInstance, AxiosResponse} from 'axios';
-import {Message, Method, rpc, RPCImpl, RPCImplCallback} from 'protobufjs';
+import { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+import { Message, Method, rpc, RPCImpl, RPCImplCallback } from 'protobufjs';
 
 interface TwirpError {
     code: string;
@@ -20,14 +20,14 @@ const getTwirpError = (err: AxiosError): TwirpError => {
         if (headers['content-type'] === 'application/json') {
             let s = data.toString();
 
-            if (s === "[object ArrayBuffer]") {
+            if (s === '[object ArrayBuffer]') {
                 s = String.fromCharCode.apply(null, new Uint8Array(data));
             }
 
             try {
                 twirpError = JSON.parse(s);
             } catch (e) {
-                twirpError.msg = `JSON.parse() error: ${e.toString()}`
+                twirpError.msg = `JSON.parse() error: ${e.toString()}`;
             }
         }
     }
@@ -35,8 +35,15 @@ const getTwirpError = (err: AxiosError): TwirpError => {
     return twirpError;
 };
 
-export const createTwirpAdapter = (axios: AxiosInstance, methodLookup: (fn: any) => string): RPCImpl => {
-    return (method: Method | rpc.ServiceMethod<Message<{}>,Message<{}>>, requestData: Uint8Array, callback: RPCImplCallback) => {
+export const createTwirpAdapter = (
+    axios: AxiosInstance,
+    methodLookup: (fn: any) => string
+): RPCImpl => {
+    return (
+        method: Method | rpc.ServiceMethod<Message<{}>, Message<{}>>,
+        requestData: Uint8Array,
+        callback: RPCImplCallback
+    ) => {
         axios({
             method: 'POST',
             url: methodLookup(method),
@@ -48,12 +55,11 @@ export const createTwirpAdapter = (axios: AxiosInstance, methodLookup: (fn: any)
             data: requestData.slice(),
             responseType: 'arraybuffer'
         })
-        .then((resp: AxiosResponse<Uint8Array|ArrayBuffer>) => {
-            callback(null, new Uint8Array(resp.data));
-
-        })
-        .catch((err: AxiosError) => {
-            callback(new Error(getTwirpError(err).msg), null);
-        });
+            .then((resp: AxiosResponse<Uint8Array | ArrayBuffer>) => {
+                callback(null, new Uint8Array(resp.data));
+            })
+            .catch((err: AxiosError) => {
+                callback(new Error(getTwirpError(err).msg), null);
+            });
     };
 };

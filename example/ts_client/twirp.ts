@@ -1,13 +1,12 @@
-
 export interface TwirpErrorJSON {
     code: string;
     msg: string;
-    meta: {[index:string]: string};
+    meta: { [index: string]: string };
 }
 
 export class TwirpError extends Error {
     code: string;
-    meta: {[index:string]: string};
+    meta: { [index: string]: string };
 
     constructor(te: TwirpErrorJSON) {
         super(te.msg);
@@ -18,17 +17,22 @@ export class TwirpError extends Error {
 }
 
 export const throwTwirpError = (resp: Response) => {
-    return resp.json().then((err: TwirpErrorJSON) => { throw new TwirpError(err); })
+    return resp.json().then((err: TwirpErrorJSON) => {
+        throw new TwirpError(err);
+    });
 };
 
 export const createTwirpRequest = (url: string, body: object): Request => {
     return new Request(url, {
-        method: "POST",
+        method: 'POST',
         headers: {
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
     });
 };
 
-export type Fetch = (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+export type Fetch = (
+    input: RequestInfo,
+    init?: RequestInit
+) => Promise<Response>;
