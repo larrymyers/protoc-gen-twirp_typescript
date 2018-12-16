@@ -1,3 +1,7 @@
+GO     ?= go
+PROTOC ?= protoc
+GOLINT ?= golint
+NPM    ?= npm
 BINARY := protoc-gen-twirp_typescript
 
 TIMESTAMP := $(shell date -u "+%Y-%m-%dT%H:%M:%SZ")
@@ -9,25 +13,41 @@ LDFLAGS := -ldflags "-X main.Timestamp=${TIMESTAMP} -X main.Commit=${COMMIT} -X 
 all: clean test install
 
 install:
-	go install ${LDFLAGS} go.larrymyers.com/protoc-gen-twirp_typescript
+	$(GO) install ${LDFLAGS} go.larrymyers.com/protoc-gen-twirp_typescript
 
 test:
-	go test -v ./...
+	$(GO) test -v ./...
 
 lint:
-	golint -set_exit_status ./...
+	$(GOLINT) -set_exit_status ./...
 
-build_proto: install
-	protoc --twirp_out=. --go_out=. --twirp_typescript_out=package_name=haberdasher:./example/ts_client ./example/service.proto
+gen-example-go: install
+	$(PROTOC) --twirp_out=. --go_out=. ./example/*.proto
 
-build_linux:
-	GOOS=linux GOARCH=amd64 go build -o ${BINARY} ${LDFLAGS} go.larrymyers.com/protoc-gen-twirp_typescript
+gen-example-pbjs-client: install
+	$(PROTOC) --twirp_typescript_out=library=pbjs:./example/pbjs_client ./example/*.proto
 
-client_setup:
+gen-example-ts-client: install
+	$(PROTOC) --twirp_typescript_out=package_name=haberdasher:./example/ts_client ./example/*.proto
+
+generate:
+	$(MAKE) gen-example-go
+	$(MAKE) gen-example-pbjs-client
+	$(MAKE) gen-example-ts-client
+
+build-linux:
+	GOOS=linux GOARCH=amd64 \
+	$(GO) build -o $(BINARY) $(LDFLAGS) go.larrymyers.com/protoc-gen-twirp_typescript
+
+client-setup:
 	cd pbjs-twirp && \
-	npm link && \
+	$(NPM) link && \
 	cd ../example/pbjs_client && \
-	npm link pbjs-twirp
+	$(NPM) link pbjs-twirp
 
 clean:
-	-rm -f ${GOPATH}/bin/${BINARY}
+	-rm -f $(GOPATH)/bin/$(BINARY)
+
+.PHONY: install test lint \
+	gen-example-go gen-example-pbjs-client gen-example-ts-client generate \
+	clean
