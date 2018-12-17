@@ -73,6 +73,11 @@ func (g *Generator) Generate(d *descriptor.FileDescriptorProto) ([]*plugin.CodeG
 		return []*plugin.CodeGeneratorResponse_File{}, nil
 	}
 
+	// If there are no services, there's nothing to generate for this file.
+	if len(d.Service) == 0 {
+		return []*plugin.CodeGeneratorResponse_File{}, nil
+	}
+
 	twirpPrefix := "/twirp"
 	if g.twirpVersion == "v6" {
 		twirpPrefix = ""
