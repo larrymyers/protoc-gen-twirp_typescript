@@ -23,3 +23,7 @@ There is a provided [example](example/pbjs_client) that shows how to use the gen
 - pbjs-twirp
 - protobufjs
 - typescript
+
+## Required polyfill for non-evergreen browsers
+
+Non-[evergreen](https://www.techopedia.com/definition/31094/evergreen-browser) browsers (like IE11) require the use of a polyfill for the `Uint8Array.slice()` that is needed to send protobuf over the wire.  A known working polyfill that can be used it [typedarray-slice](https://www.npmjs.com/package/typedarray-slice).  If using Anguar, just drop `import 'typedarray-slice';` into `polyfills.ts`.
