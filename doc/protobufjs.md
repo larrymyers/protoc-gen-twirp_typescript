@@ -6,7 +6,7 @@ See: https://github.com/dcodeIO/ProtoBuf.js/#using-services
 
 The `pbjs` and `pbts` commands provided by protobuf.js still need to be used to generate the protobuf client.
 
-There is a provided [example](example/pbjs_client) that shows how to use the generated code.
+There is a provided [example](../example/pbjs_client) that shows how to use the generated code.
 
 ## Generate Protobuf.js Code
 
