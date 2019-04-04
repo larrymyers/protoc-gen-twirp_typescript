@@ -33,11 +33,7 @@ const getServiceMethodName = (fn: any): string => {
 {{range .Services}}
 export const {{.Name}}PathPrefix = '{{$twirpPrefix}}/{{.Package}}.{{.Name}}/';
 
-export interface clientOptions {
-    headers: () => any
-};
-
-export const create{{.Name}} = (baseURL: string, options?: clientOptions): {{.Package}}.{{.Name}} => {
+export const create{{.Name}} = (baseURL: string, options?: { headers: () => any }): {{.Package}}.{{.Name}} => {
     const axios = Axios.create({
         baseURL: baseURL + {{.Name}}PathPrefix,
         headers: {
@@ -47,7 +43,7 @@ export const create{{.Name}} = (baseURL: string, options?: clientOptions): {{.Pa
 
     return {{.Package}}.{{.Name}}.create(createTwirpAdapter(axios, Object.assign({
         methodLookup: getServiceMethodName,
-    }, options)
+    }, options) as adapterOptions
     ));
 };
 {{- end}}
