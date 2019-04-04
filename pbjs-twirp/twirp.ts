@@ -35,14 +35,24 @@ const getTwirpError = (err: AxiosError): TwirpError => {
     return twirpError;
 };
 
-export const createTwirpAdapter = (axios: AxiosInstance, methodLookup: (fn: any) => string): RPCImpl => {
+export interface adapterOptions {
+    methodLookup: (fn: any) => string,
+    headers: () => any
+};
+
+export const createTwirpAdapter = (axios: AxiosInstance, options: adapterOptions): RPCImpl => {
+    if (!options || typeof options.methodLookup !== "function")
+        throw "options.methodLookup must be defined";
+
+    const requestHeaders = (options && typeof options.headers === "function" ? options.headers : ((): any => { return {}; }));
+
     return (method: Method | rpc.ServiceMethod<Message<{}>,Message<{}>>, requestData: Uint8Array, callback: RPCImplCallback) => {
         axios({
             method: 'POST',
-            url: methodLookup(method),
-            headers: {
+            url: options.methodLookup(method),
+            headers: Object.assign({
                 'Content-Type': 'application/protobuf'
-            },
+            }, requestHeaders()),
             // required to get an arraybuffer of the actual size, not the 8192 buffer pool that protobuf.js uses
             // see: https://github.com/dcodeIO/protobuf.js/issues/852
             data: requestData.slice(),
