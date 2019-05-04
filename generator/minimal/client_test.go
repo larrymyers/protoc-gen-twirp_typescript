@@ -39,7 +39,7 @@ func TestAPIContext_ApplyMarshalFlags(t *testing.T) {
 		Methods: []ServiceMethod{call},
 	}
 
-	ctx := NewAPIContext()
+	ctx := NewAPIContext("")
 
 	ctx.AddModel(nested)
 	ctx.AddModel(bar)
