@@ -149,6 +149,15 @@ func (ctx *APIContext) AddModel(m *Model) {
 	ctx.modelLookup[m.Name] = m
 }
 
+func getBaseType(f ModelField) string {
+	baseType := f.Type
+	if f.IsRepeated {
+		baseType = strings.Trim(baseType, "[]")
+	}
+
+	return baseType
+}
+
 // ApplyMarshalFlags will inspect the CanMarshal and CanUnmarshal flags for models where
 // the flags are enabled and recursively set the same values on all the models that are field types.
 func (ctx *APIContext) ApplyMarshalFlags() {
@@ -159,10 +168,7 @@ func (ctx *APIContext) ApplyMarshalFlags() {
 				continue
 			}
 
-			baseType := f.Type
-			if f.IsRepeated {
-				baseType = strings.Trim(baseType, "[]")
-			}
+			baseType := getBaseType(f)
 
 			if m.CanMarshal {
 				ctx.enableMarshal(ctx.modelLookup[baseType])
@@ -187,7 +193,10 @@ func (ctx *APIContext) enableMarshal(m *Model) {
 		if !f.IsMessage || f.Type == "Date" {
 			continue
 		}
-		mm, ok := ctx.modelLookup[f.Type]
+
+		baseType := getBaseType(f)
+
+		mm, ok := ctx.modelLookup[baseType]
 		if !ok {
 			log.Fatalf("could not find model of type %s for field %s", f.Type, f.Name)
 		}
@@ -203,7 +212,9 @@ func (ctx *APIContext) enableUnmarshal(m *Model) {
 		if !f.IsMessage || f.Type == "Date" {
 			continue
 		}
-		mm, ok := ctx.modelLookup[f.Type]
+		baseType := getBaseType(f)
+
+		mm, ok := ctx.modelLookup[baseType]
 		if !ok {
 			log.Fatalf("could not find model of type %s for field %s", f.Type, f.Name)
 		}
