@@ -9,6 +9,18 @@ func TestAPIContext_ApplyMarshalFlags(t *testing.T) {
 		Name: "Nested",
 	}
 
+	nestedRepeated := &Model {
+		Name: "NestedRepeated",
+		Fields: []ModelField{
+			{
+				Name:      "nested",
+				Type:      nested.Name + "[]",
+				IsMessage: true,
+				IsRepeated: true,
+			},
+		},
+	}
+
 	bar := &Model{
 		Name:       "Bar",
 		CanMarshal: true,
@@ -24,6 +36,13 @@ func TestAPIContext_ApplyMarshalFlags(t *testing.T) {
 	baz := &Model{
 		Name:         "Baz",
 		CanUnmarshal: true,
+		Fields: []ModelField{
+			{
+				Name:      "nestedRepeated",
+				Type:      nestedRepeated.Name,
+				IsMessage: true,
+			},
+		},
 	}
 
 	call := ServiceMethod{
@@ -39,9 +58,10 @@ func TestAPIContext_ApplyMarshalFlags(t *testing.T) {
 		Methods: []ServiceMethod{call},
 	}
 
-	ctx := NewAPIContext()
+	ctx := NewAPIContext("v5")
 
 	ctx.AddModel(nested)
+	ctx.AddModel(nestedRepeated)
 	ctx.AddModel(bar)
 	ctx.AddModel(baz)
 	ctx.Services = append(ctx.Services, s)

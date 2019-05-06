@@ -149,20 +149,28 @@ func (ctx *APIContext) AddModel(m *Model) {
 	ctx.modelLookup[m.Name] = m
 }
 
+func shouldSkipField(f ModelField) bool {
+	// skip primitive types and WKT Timestamps
+	return !f.IsMessage || f.Type == "Date"
+}
+
+func getBaseType(f ModelField) string {
+	if f.IsRepeated {
+		return strings.Trim(f.Type, "[]")
+	}
+	return f.Type
+}
+
 // ApplyMarshalFlags will inspect the CanMarshal and CanUnmarshal flags for models where
 // the flags are enabled and recursively set the same values on all the models that are field types.
 func (ctx *APIContext) ApplyMarshalFlags() {
 	for _, m := range ctx.Models {
 		for _, f := range m.Fields {
-			// skip primitive types and WKT Timestamps
-			if !f.IsMessage || f.Type == "Date" {
+			if shouldSkipField(f) {
 				continue
 			}
 
-			baseType := f.Type
-			if f.IsRepeated {
-				baseType = strings.Trim(baseType, "[]")
-			}
+			baseType := getBaseType(f)
 
 			if m.CanMarshal {
 				ctx.enableMarshal(ctx.modelLookup[baseType])
@@ -183,13 +191,14 @@ func (ctx *APIContext) enableMarshal(m *Model) {
 	m.CanMarshal = true
 
 	for _, f := range m.Fields {
-		// skip primitive types and WKT Timestamps
-		if !f.IsMessage || f.Type == "Date" {
+		if shouldSkipField(f) {
 			continue
 		}
-		mm, ok := ctx.modelLookup[f.Type]
+
+		baseType := getBaseType(f)
+		mm, ok := ctx.modelLookup[baseType]
 		if !ok {
-			log.Fatalf("could not find model of type %s for field %s", f.Type, f.Name)
+			log.Fatalf("could not find model of type %s for field %s", baseType, f.Name)
 		}
 		ctx.enableMarshal(mm)
 	}
@@ -199,13 +208,14 @@ func (ctx *APIContext) enableUnmarshal(m *Model) {
 	m.CanUnmarshal = true
 
 	for _, f := range m.Fields {
-		// skip primitive types and WKT Timestamps
-		if !f.IsMessage || f.Type == "Date" {
+		if shouldSkipField(f) {
 			continue
 		}
-		mm, ok := ctx.modelLookup[f.Type]
+
+		baseType := getBaseType(f)
+		mm, ok := ctx.modelLookup[baseType]
 		if !ok {
-			log.Fatalf("could not find model of type %s for field %s", f.Type, f.Name)
+			log.Fatalf("could not find model of type %s for field %s", baseType, f.Name)
 		}
 		ctx.enableUnmarshal(mm)
 	}
