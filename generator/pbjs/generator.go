@@ -33,13 +33,16 @@ const getServiceMethodName = (fn: any): string => {
 {{range .Services}}
 export const {{.Name}}PathPrefix = '{{$twirpPrefix}}/{{.Package}}.{{.Name}}/';
 
-export const create{{.Name}} = (baseURL: string): {{.Package}}.{{.Name}} => {
-	const axios = Axios.create({
+export const create{{.Name}} = (baseURL: string, options = {}): {{.Package}}.{{.Name}} => {
+    const defaultOpts = {
         baseURL: baseURL + {{.Name}}PathPrefix,
         headers: {
           Accept: 'application/protobuf'
         }
-    });
+    };
+    const axiosOpts = { ...defaultOpts, ...options };
+    
+    const axios = Axios.create(axiosOpts);
 
     return {{.Package}}.{{.Name}}.create(createTwirpAdapter(axios, getServiceMethodName));
 };
