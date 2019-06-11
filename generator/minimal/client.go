@@ -21,13 +21,13 @@ import {createTwirpRequest, throwTwirpError, Fetch} from './twirp';
 export interface {{.Name}} {
     {{range .Fields -}}
     {{.Name}}?: {{.Type}};
-    {{end}}
+    {{- end}}
 }
 
 interface {{.Name}}JSON {
     {{range .Fields -}}
     {{.JSONName}}?: {{.JSONType}};
-    {{end}}
+    {{- end}}
 }
 
 {{if .CanMarshal}}
@@ -36,7 +36,7 @@ const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
     return {
         {{range .Fields -}}
         {{.JSONName}}: {{stringify .}},
-        {{end}}
+        {{- end}}
     };
 };
 {{else -}}
@@ -49,11 +49,11 @@ const {{.Name}}ToJSON = (_: {{.Name}}): {{.Name}}JSON => {
 
 {{if .CanUnmarshal}}
 const JSONTo{{.Name}} = (m: {{.Name}} | {{.Name}}JSON): {{.Name}} => {
-    {{$Model := .Name}}
+    {{$Model := .Name -}}
     return {
         {{range .Fields -}}
         {{.Name}}: {{parse . $Model}},
-        {{end}}
+        {{- end}}
     };
 };
 {{end -}}
