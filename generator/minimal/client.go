@@ -31,6 +31,7 @@ interface {{.Name}}JSON {
 }
 
 {{if .CanMarshal}}
+{{if .Fields}}
 const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
     return {
         {{range .Fields -}}
@@ -38,6 +39,12 @@ const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
         {{end}}
     };
 };
+{{else -}}
+{{/* Handle the generic empty message */ -}}
+const {{.Name}}ToJSON = (_: {{.Name}}): {{.Name}}JSON => {
+    return {};
+};
+{{end}}
 {{end -}}
 
 {{if .CanUnmarshal}}
@@ -50,6 +57,7 @@ const JSONTo{{.Name}} = (m: {{.Name}} | {{.Name}}JSON): {{.Name}} => {
     };
 };
 {{end -}}
+
 {{end -}}
 {{end}}
 
