@@ -336,7 +336,6 @@ func (g *Generator) Generate(d *descriptor.FileDescriptorProto) ([]*plugin.CodeG
 	clientAPI.Content = proto.String(b.String())
 
 	files = append(files, clientAPI)
-	files = append(files, RuntimeLibrary())
 
 	if pkgName, ok := g.params["package_name"]; ok {
 		idx, err := CreatePackageIndex(files)
