@@ -48,6 +48,7 @@ const {{.Name}}ToJSON = (_: {{.Name}}): {{.Name}}JSON => {
 {{end -}}
 
 {{if .CanUnmarshal}}
+{{if .Fields}}
 const JSONTo{{.Name}} = (m: {{.Name}} | {{.Name}}JSON): {{.Name}} => {
     {{$Model := .Name -}}
     return {
@@ -56,6 +57,12 @@ const JSONTo{{.Name}} = (m: {{.Name}} | {{.Name}}JSON): {{.Name}} => {
         {{- end}}
     };
 };
+{{else -}}
+{{/* Handle the generic empty message */ -}}
+const JSONTo{{.Name}} = (_: {{.Name}} | {{.Name}}JSON): {{.Name}} => {
+    return {};
+};
+{{end}}
 {{end -}}
 
 {{end -}}
