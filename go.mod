@@ -1,4 +1,4 @@
-module go.larrymyers.com/protoc-gen-twirp_typescript
+module github.com/ravenops/protoc-gen-twirp_typescript
 
 require (
 	github.com/golang/protobuf v1.2.0

@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
-	"go.larrymyers.com/protoc-gen-twirp_typescript/generator"
+	"github.com/ravenops/protoc-gen-twirp_typescript/generator"
 )
 
 func main() {

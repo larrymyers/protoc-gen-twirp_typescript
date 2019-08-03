@@ -12,7 +12,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/twitchtv/twirp"
-	"go.larrymyers.com/protoc-gen-twirp_typescript/example"
+	"github.com/ravenops/protoc-gen-twirp_typescript/example"
 )
 
 type randomHaberdasher struct{}
