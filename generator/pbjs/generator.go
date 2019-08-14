@@ -59,7 +59,7 @@ function createTwirpAdapter(
           if (headers["content-type"] === "application/json") {
             const d = new TextDecoder("utf-8").decode(data);
             try {
-              twirpError = JSON.parse(s);
+              twirpError = JSON.parse(d);
             } catch (e) {
               twirpError.msg = ` + "`" + `JSON.parse() error: ${e.toString()}` + "`" + `;
             }
@@ -210,7 +210,7 @@ func pbjsImport(packageName string) string {
 	parts := strings.Split(packageName, ".")
 
 	if len(parts) > 0 {
-		return "{" + parts[0] + "}"
+		return "{ " + parts[0] + " }"
 	}
 
 	return ""
