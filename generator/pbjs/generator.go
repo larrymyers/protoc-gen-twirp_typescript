@@ -57,13 +57,7 @@ function createTwirpAdapter(
           const data = resp.data;
 
           if (headers["content-type"] === "application/json") {
-            let s = data.toString();
-
-            if (s === "[object ArrayBuffer]") {
-              const b = new Uint8Array(data);
-              s = b.toString();
-            }
-
+            const d = new TextDecoder("utf-8").decode(data);
             try {
               twirpError = JSON.parse(s);
             } catch (e) {
