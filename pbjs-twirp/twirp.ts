@@ -21,7 +21,7 @@ const getTwirpError = (err: AxiosError): TwirpError => {
             let s = data.toString();
 
             if (s === "[object ArrayBuffer]") {
-                s = String.fromCharCode.apply(null, new Uint8Array(data));
+                s = new TextDecoder("utf-8").decode(new Uint8Array(data));
             }
 
             try {
