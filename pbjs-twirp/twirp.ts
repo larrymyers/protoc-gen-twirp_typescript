@@ -4,16 +4,19 @@ import {Message, Method, rpc, RPCImpl, RPCImplCallback} from 'protobufjs';
 interface TwirpError {
     code: string;
     msg: string;
+    meta:{[key:string]:string};
 }
 
 const getTwirpError = (err: AxiosError): TwirpError => {
     const resp = err.response;
     let twirpError = {
         code: 'unknown',
-        msg: 'unknown error'
+        msg: 'unknown error',
+        meta: {}
     };
 
     if (resp) {
+        console.warn(resp)
         const headers = resp.headers;
         const data = resp.data;
 
