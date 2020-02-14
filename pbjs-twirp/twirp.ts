@@ -4,7 +4,7 @@ import {Message, Method, rpc, RPCImpl, RPCImplCallback} from 'protobufjs';
 interface TwirpError {
     code: string;
     msg: string;
-    meta:{[key:string]:string};
+    meta?:{[key:string]:string};
 }
 
 const getTwirpError = (err: AxiosError): TwirpError => {
@@ -16,7 +16,6 @@ const getTwirpError = (err: AxiosError): TwirpError => {
     };
 
     if (resp) {
-        console.warn(resp)
         const headers = resp.headers;
         const data = resp.data;
 
@@ -56,7 +55,7 @@ export const createTwirpAdapter = (axios: AxiosInstance, methodLookup: (fn: any)
 
         })
         .catch((err: AxiosError) => {
-            callback(new Error(getTwirpError(err).msg), null);
+            callback(getTwirpError(err), null);
         });
     };
 };
