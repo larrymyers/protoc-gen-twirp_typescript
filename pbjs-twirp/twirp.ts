@@ -7,7 +7,7 @@ interface InternalTwirpError {
     meta?:{[key:string]:string};
 }
 
-class TwirpError extends Error {
+export class TwirpError extends Error {
     code: string;
     meta?: {[key: string]: string};
 
