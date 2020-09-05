@@ -381,6 +381,7 @@ func protoToTSType(f *descriptor.FieldDescriptorProto) (string, string) {
 
 	switch f.GetType() {
 	case descriptor.FieldDescriptorProto_TYPE_DOUBLE,
+		descriptor.FieldDescriptorProto_TYPE_FLOAT,
 		descriptor.FieldDescriptorProto_TYPE_FIXED32,
 		descriptor.FieldDescriptorProto_TYPE_FIXED64,
 		descriptor.FieldDescriptorProto_TYPE_INT32,
