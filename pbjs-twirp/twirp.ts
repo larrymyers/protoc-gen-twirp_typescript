@@ -33,7 +33,7 @@ const getTwirpError = (err: AxiosError): TwirpError => {
         const headers = resp.headers;
         const data = resp.data;
 
-        if (headers['content-type'].match(/^(?=.*application\/json).*$/)) {
+        if (/application\/json/.test(headers['content-type'])) {
             let s = data.toString();
 
             if (s === "[object ArrayBuffer]") {
