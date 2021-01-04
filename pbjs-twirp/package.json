@@ -9,7 +9,7 @@
   "author": "Larry Myers <larry@larrymyers.com>",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.19.0",
-    "protobufjs": "^6.8.8"
+    "axios": "^0.21.1",
+    "protobufjs": "^6.10.2"
   }
 }
