@@ -11,5 +11,8 @@
   "dependencies": {
     "axios": "^0.21.1",
     "protobufjs": "^6.10.2"
+  },
+  "devDependencies": {
+    "typescript": "^4.1.3"
   }
 }

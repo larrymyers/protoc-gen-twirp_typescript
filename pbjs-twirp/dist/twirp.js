@@ -11,7 +11,7 @@ var getTwirpError = function (err) {
     if (resp) {
         var headers = resp.headers;
         var data = resp.data;
-        if (headers['content-type'] === 'application/json') {
+        if (/application\/json/.test(headers['content-type'])) {
             var s = data.toString();
             if (s === "[object ArrayBuffer]") {
                 s = new TextDecoder("utf-8").decode(new Uint8Array(data));
@@ -26,7 +26,7 @@ var getTwirpError = function (err) {
     }
     return twirpError;
 };
-exports.createTwirpAdapter = function (axios, methodLookup) {
+var createTwirpAdapter = function (axios, methodLookup) {
     return function (method, requestData, callback) {
         axios({
             method: 'POST',
@@ -49,3 +49,4 @@ exports.createTwirpAdapter = function (axios, methodLookup) {
         });
     };
 };
+exports.createTwirpAdapter = createTwirpAdapter;
