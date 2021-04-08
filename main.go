@@ -8,6 +8,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 	"go.larrymyers.com/protoc-gen-twirp_typescript/generator"
+	"go.larrymyers.com/protoc-gen-twirp_typescript/generator/minimal"
 )
 
 func main() {
@@ -53,6 +54,11 @@ func generate(in *plugin.CodeGeneratorRequest) *plugin.CodeGeneratorResponse {
 		for _, cf := range files {
 			resp.File = append(resp.File, cf)
 		}
+	}
+
+	lib, _ := params["library"]
+	if lib != "pbjs" {
+		resp.File = append(resp.File, minimal.RuntimeLibrary())
 	}
 
 	return resp
