@@ -33,6 +33,10 @@ interface {{.Name}}JSON {
 {{if .CanMarshal}}
 {{if .Fields}}
 const {{.Name}}ToJSON = (m: {{.Name}}): {{.Name}}JSON => {
+	if (m === null) {
+		return null;
+	}
+	
     return {
         {{- range .Fields}}
         {{.JSONName}}: {{stringify .}},
@@ -51,6 +55,9 @@ const {{.Name}}ToJSON = (_: {{.Name}}): {{.Name}}JSON => {
 {{if .Fields}}
 const JSONTo{{.Name}} = (m: {{.Name}} | {{.Name}}JSON): {{.Name}} => {
     {{$Model := .Name -}}
+	if (m === null) {
+		return null;
+	}
     return {
         {{- range .Fields}}
         {{.Name}}: {{parse . $Model}},
