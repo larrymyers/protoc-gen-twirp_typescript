@@ -1,10 +1,24 @@
 import {AxiosError, AxiosInstance, AxiosResponse} from 'axios';
 import {Message, Method, rpc, RPCImpl, RPCImplCallback} from 'protobufjs';
 
-interface TwirpError {
+interface InternalTwirpError {
     code: string;
     msg: string;
     meta?:{[key:string]:string};
+}
+
+export class TwirpError extends Error {
+    code: string;
+    meta?: {[key: string]: string};
+
+    constructor(message: string, twirpError: InternalTwirpError) {
+        super(message);
+        this.name = this.constructor.name;
+        Object.setPrototypeOf(this, new.target.prototype);
+        
+        this.code = twirpError.code;
+        this.meta = twirpError.meta;
+    }
 }
 
 const getTwirpError = (err: AxiosError): TwirpError => {
@@ -34,7 +48,7 @@ const getTwirpError = (err: AxiosError): TwirpError => {
         }
     }
 
-    return twirpError;
+    return new TwirpError(twirpError.msg, twirpError);
 };
 
 export const createTwirpAdapter = (axios: AxiosInstance, methodLookup: (fn: any) => string): RPCImpl => {
