@@ -16,6 +16,14 @@ import (
 const apiTemplate = `
 import {createTwirpRequest, throwTwirpError, Fetch} from './twirp';
 
+{{range .Enums}}
+export enum {{.Name}} {
+	{{- range .Options}}
+    {{.Key}} = {{.Value}},
+    {{- end}}
+}
+{{end -}}
+
 {{range .Models}}
 {{- if not .Primitive}}
 export interface {{.Name}} {
@@ -118,6 +126,16 @@ export class Default{{.Name}} implements {{.Name}} {
 {{end}}
 `
 
+type EnumOption struct {
+	Key string
+	Value interface{}
+}
+
+type Enum struct {
+	Name string
+	Options []EnumOption
+}
+
 type Model struct {
 	Name         string
 	Primitive    bool
@@ -156,6 +174,7 @@ func NewAPIContext(twirpVersion string) APIContext {
 	}
 
 	ctx := APIContext{TwirpPrefix: twirpPrefix}
+
 	ctx.modelLookup = make(map[string]*Model)
 
 	return ctx
@@ -164,6 +183,7 @@ func NewAPIContext(twirpVersion string) APIContext {
 type APIContext struct {
 	Models      []*Model
 	Services    []*Service
+	Enums       []*Enum
 	TwirpPrefix string
 	modelLookup map[string]*Model
 }
@@ -306,6 +326,20 @@ func (g *Generator) Generate(d *descriptor.FileDescriptorProto) ([]*plugin.CodeG
 		ctx.Services = append(ctx.Services, service)
 	}
 
+	for _, e := range d.GetEnumType() {
+		options := make([]EnumOption, 0)
+		for _, x := range e.GetValue() {
+			options = append(options, EnumOption{
+				Key:   x.GetName(),
+				Value: x.GetNumber(),
+			})
+		}
+		ctx.Enums = append(ctx.Enums, &Enum{
+			Name:   e.GetName(),
+			Options: options,
+		})
+	}
+
 	// Only include the custom 'ToJSON' and 'JSONTo' methods in generated code
 	// if the Model is part of an rpc method input arg or return type.
 	for _, m := range ctx.Models {
@@ -417,7 +451,8 @@ func protoToTSType(f *descriptor.FieldDescriptorProto) (string, string) {
 	case descriptor.FieldDescriptorProto_TYPE_BOOL:
 		tsType = "boolean"
 		jsonType = "boolean"
-	case descriptor.FieldDescriptorProto_TYPE_MESSAGE:
+	case descriptor.FieldDescriptorProto_TYPE_ENUM,
+	     descriptor.FieldDescriptorProto_TYPE_MESSAGE:
 		name := f.GetTypeName()
 
 		// Google WKT Timestamp is a special case here:
@@ -430,7 +465,10 @@ func protoToTSType(f *descriptor.FieldDescriptorProto) (string, string) {
 			jsonType = "string"
 		} else {
 			tsType = removePkg(name)
-			jsonType = removePkg(name) + "JSON"
+			jsonType = removePkg(name)
+			if f.GetType() == descriptor.FieldDescriptorProto_TYPE_MESSAGE {
+				jsonType += "JSON"
+			}
 		}
 	}
 
