@@ -8,11 +8,13 @@
   },
   "author": "Larry Myers <larry@larrymyers.com>",
   "license": "MIT",
-  "dependencies": {
+  "peerDependencies": {
     "axios": "^0.24.0",
     "protobufjs": "^6.11.2"
   },
   "devDependencies": {
+    "axios": "^0.24.0",
+    "protobufjs": "^6.11.2",
     "typescript": "^4.5.3"
   }
 }
