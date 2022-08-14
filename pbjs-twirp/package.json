@@ -1,6 +1,6 @@
 {
   "name": "pbjs-twirp",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "the runtime library for protoc-gen-twirp_typescript",
   "main": "dist/twirp.js",
   "scripts": {
