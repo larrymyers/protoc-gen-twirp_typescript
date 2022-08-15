@@ -296,6 +296,7 @@ func (g *Generator) Generate(d *descriptor.FileDescriptorProto) ([]*plugin.CodeG
 			model.Fields = append(model.Fields, newField(f))
 		}
 
+		ctx.Enums = append(ctx.Enums, extractEnums(m.GetEnumType())...)
 		ctx.AddModel(model)
 	}
 
@@ -326,19 +327,7 @@ func (g *Generator) Generate(d *descriptor.FileDescriptorProto) ([]*plugin.CodeG
 		ctx.Services = append(ctx.Services, service)
 	}
 
-	for _, e := range d.GetEnumType() {
-		options := make([]EnumOption, 0)
-		for _, x := range e.GetValue() {
-			options = append(options, EnumOption{
-				Key:   x.GetName(),
-				Value: x.GetNumber(),
-			})
-		}
-		ctx.Enums = append(ctx.Enums, &Enum{
-			Name:   e.GetName(),
-			Options: options,
-		})
-	}
+	ctx.Enums = append(ctx.Enums, extractEnums(d.GetEnumType())...)
 
 	// Only include the custom 'ToJSON' and 'JSONTo' methods in generated code
 	// if the Model is part of an rpc method input arg or return type.
@@ -557,4 +546,22 @@ func parse(f ModelField, modelName string) string {
 	}
 
 	return field
+}
+
+func extractEnums(d []*descriptor.EnumDescriptorProto) []*Enum {
+	enums := make([]*Enum, 0)
+	for _, e := range d {
+		options := make([]EnumOption, 0)
+		for _, x := range e.GetValue() {
+			options = append(options, EnumOption{
+				Key:   x.GetName(),
+				Value: x.GetNumber(),
+			})
+		}
+		enums = append(enums, &Enum{
+			Name:   e.GetName(),
+			Options: options,
+		})
+	}
+	return enums
 }
