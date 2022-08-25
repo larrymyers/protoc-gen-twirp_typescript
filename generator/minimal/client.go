@@ -537,7 +537,7 @@ func parse(f ModelField, modelName string) string {
 		singularTSType := strings.Trim(f.Type, "[]")       // strip array brackets from type
 		singularJSONType := strings.Trim(f.JSONType, "[]") // strip array brackets from type
 
-		arrayField := fmt.Sprintf("(%s as (%s | %s)[])", field, singularTSType, singularJSONType)
+		arrayField := fmt.Sprintf("((%s as (%s | %s)[]) || [])", field, singularTSType, singularJSONType)
 
 		if f.Type == "Date[]" {
 			return fmt.Sprintf("%s.map((n) => new Date(n))", arrayField)
@@ -546,6 +546,8 @@ func parse(f ModelField, modelName string) string {
 		if f.IsMessage {
 			return fmt.Sprintf("%s.map(JSONTo%s)", arrayField, singularTSType)
 		}
+
+		return fmt.Sprintf("%s || []", field)
 	}
 
 	if f.Type == "Date" {
